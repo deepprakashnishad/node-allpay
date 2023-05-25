@@ -1,0 +1,105 @@
+<style>
+
+.left{
+	float: left;
+}
+
+.right{
+	float: right;
+}
+
+.row{
+	display: inline-block;
+	width: 100%;
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+</style>
+
+<div class="row">
+	<img  src="https://everythingsatvik.com/assets/images/logo.jpeg" width="125" height="125"/>
+	<div>
+		<h4>Order Confirmation Mail</h4>
+		<h4>Order Id: <%=orderId%></h4>
+	</div>
+</div>
+
+<center>
+	<h3>Dear <%=personName%>Thank you for choosing Everything Satvik!</h3>
+	<h3>This is a mail of confirming your order.</h3>
+	<h3>
+		Your order will be delivered by 5-7 days from the day of dispatch. We will
+		confirm your dispatch by mail
+	</h3>
+</center>
+
+<h3 class="left">Your order will be sent to</h3>
+<div><%=address.name%></div>
+<div><%=address.line1%></div>
+<div><%=address.line2%></div>
+<div><%=address.area%></div>
+<div>Near <%=address.landmark%></div>
+<div><%=address.city%></div>
+<div><%=address.state%> - <%=address.pincode%></div>
+<div>Contact - <%=address.mob1%></div>
+
+<h3>Order Summary</h3>
+<div>Order Id: <%=orderId%></div>
+
+<table>
+	<tr>
+		<th>No.</th>
+		<th>Item</th>
+		<th>Brand</th>
+		<th>Unit Price</th>
+		<th>Qty</th>
+		<th>Sub-Total</th>
+	</tr>
+	<% var totalItemPrice=0; %>
+	<% for(var i=0; i < items.length; i++) { %>
+		<tr>
+			<td><%= i+1 %></td>
+			<td><%= items[i].name %></td>
+			<td><%= items[i].brand.lname %></td>
+			<% 
+				var sellingPrice = items[i].sellPrice;
+				if(items[i].discount?.length>0){ 
+					sellingPrice = items[i]?.discount[0]?.salePrice;
+				}
+			%>
+			<td><%= sellingPrice %></td>
+			<td><%= items[i].qty %></td>
+			<td><%= items[i].qty*sellingPrice %></td>
+		</tr>
+		<% totalItemPrice = totalItemPrice + items[i].qty*sellingPrice %>
+	<% } %>
+	<tr>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td>Total:</td>
+		<td><%= totalItemPrice %></td>
+	</tr>
+</table>
+
+<div>Any concerns or feedback, please contact us on</div>
+<a href="mailto:everythingsatvik.foryou@gmail.com">everythingsatvik.foryou@gmail.com</a>
+<br/>
+<div>We hope to see you soon.</div>
+<h2>Regards</h2>
+<h2>Everything Satvik Support Team</h2>
