@@ -147,7 +147,7 @@ module.exports = {
     * > Be sure to use the right protocol!  ("http://" vs. "https://")         *
     *                                                                          *
     ***************************************************************************/
-    cors: cors: {
+    cors: {
       allRoutes: true,
       allowOrigins: '*',
       allowCredentials: false,
@@ -266,10 +266,10 @@ module.exports = {
     * > Be sure to use the right protocol!  ("http://" vs. "https://")         *
     *                                                                          *
     ***************************************************************************/
-    // onlyAllowOrigins: [
-    //   'https://example.com',
-    //   'https://staging.example.com',
-    // ],
+    onlyAllowOrigins: [
+      'https://girirajstore1.web.app',
+      'https://giriraj-store.web.app',
+    ],
 
 
     /***************************************************************************
