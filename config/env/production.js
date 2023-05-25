@@ -47,8 +47,8 @@ module.exports = {
     *                                                                          *
     ***************************************************************************/
     default: {
-      // adapter: 'sails-mysql',
-      // url: 'mysql://user:password@host:port/database',
+      adapter: 'sails-mongo',
+      url: "mongodb+srv://deepexaltech:Ypuru8GibgK0hfsk@cluster0.m3clwfl.mongodb.net/my-net?retryWrites=true&w=majority"
       //--------------------------------------------------------------------------
       //  /\   To avoid checking it in to version control, you might opt to set
       //  ||   sensitive credentials like `url` using an environment variable.
@@ -147,12 +147,13 @@ module.exports = {
     * > Be sure to use the right protocol!  ("http://" vs. "https://")         *
     *                                                                          *
     ***************************************************************************/
-    cors: {
-      // allowOrigins: [
-      //   'https://example.com',
-      // ]
+    cors: cors: {
+      allRoutes: true,
+      allowOrigins: '*',
+      allowCredentials: false,
+      allowRequestMethods:'GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD',
+      allowRequestHeaders: 'content-type, authorization, access-control-allow-origin'
     },
-
   },
 
 
