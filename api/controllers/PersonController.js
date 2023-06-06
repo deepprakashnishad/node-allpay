@@ -47,34 +47,38 @@ module.exports = {
 
         if(
           sails.config.custom.APP_CONFIG['authentication'].indexOf("email")>-1 &&
-          !req.body.email && req.body.email.length===0){
+          !req.body.email && req.body.e.length===0){
           return res.successResponse({code: "Email missing"}, 400, null, false, "Email missing");
         }
 
-        if(sails.config.custom.APP_CONFIG['authentication'].indexOf("email")===-1){
+        if(sails.config.custom.APP_CONFIG['authentication'].indexOf("email")===-1 ||
+          req.body.e===null || req.body.e==="" || req.body.e==="null"){
           var users = await UserLogin.find({or: [
-            {"m": req.body.mobile.replace(/[- )(]/g,'')}
+            {"m": req.body.m.replace(/[- )(]/g,'')}
           ]});
           var persons = await Person.find({or: [
-            {"m": req.body.mobile.replace(/[- )(]/g,'')}
+            {"m": req.body.m.replace(/[- )(]/g,'')}
           ]});
         }else{
           var users = await UserLogin.find({or: [
-            {"m": req.body.mobile.replace(/[- )(]/g,'')},
-            {"e": req.body.email},
+            {"m": req.body.m.replace(/[- )(]/g,'')},
+            {"e": req.body.e},
           ]});
           var persons = await Person.find({or: [
-            {"m": req.body.mobile.replace(/[- )(]/g,'')},
-            {"e": req.body.email},
+            {"m": req.body.m.replace(/[- )(]/g,'')},
+            {"e": req.body.e},
           ]});
         }
         
         if(users.length > 0 || persons.length > 0){
           return res.successResponse({code: "Duplicate user"}, 200, null, false, "Mobile number already registered");
         }
-        var mobile = req.body.mobile.replace(/[- )(]/g,'');      
+        var mobile = req.body.m.replace(/[- )(]/g,'');      
 
-        person = await Person.create({n:req.body.name, m: mobile, e: req.body.email})
+        if(req.body.e===""){
+          req.body.e = null;
+        }
+        person = await Person.create({n:req.body.n, m: m, e: req.body.e})
         .intercept('E_UNIQUE', (err)=> {
           return res.successResponse({code: "duplicate"}, 200, null, false, "Email or mobile already in use");
         })
@@ -223,7 +227,7 @@ module.exports = {
           return res.successResponse({msg: "Permission denied 1"}, 403, null, false, "Permission denied 1");
         });
     if(payload){
-      res.json(await Person.findOne({id: payload.uid}).populate("permissions").populate("r"));
+      res.json(await Person.findOne({id: payload.uid}).populate("p"));
     }else{
       return res.successResponse({msg: "Permission denied"}, 403, null, false, "Permission denied");
     }
@@ -343,7 +347,8 @@ module.exports = {
         skip: req.query.offset,
         limit: req.query.limit,
         sort: "createdAt DESC"
-      }).populate("permissions").populate("role");
+      }).meta({makeLikeModifierCaseInsensitive: true});
+
       res.json(result);  
     }else if(req.headers.authorization){
       const payload = await sails.helpers.verifyJwt.with({"token": req.headers.authorization})
@@ -458,19 +463,38 @@ module.exports = {
   },
 
   getReferrer: async function(req, res){
-    var result = await Person.find({
-      where: {
-        or: [
-          {name: {contains: req.query.strQuery}},
-          {mobile: {contains: req.query.strQuery}},
-          {email: {contains: req.query.strQuery}},
-        ]          
-      },
-      skip: req.query.offset,
-      limit: req.query.limit,
-      sort: "createdAt DESC"
-    });
-    res.json(result);  
+    var result = await Person.findOne({m: req.query.strQuery}).populate("p");
+    if(result){
+      return res.successResponse({
+        id: result.id, 
+        n: result.n, 
+        m: result.m, 
+        e: result.e, 
+        s: result.s,
+        p: result.p? result.p.n: undefined,
+        co: result.curr_orbit,
+        success: true
+      }, 200, null, true, "Person found");
+    }else{
+      return res.successResponse({success: false}, 404, null, true, "Person not found");
+    }  
+  },
+
+  approveNewJoinee: async function(req, res){
+    payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization})
+    .tolerate(()=>{});
+
+    if(req.body.amount !== sails.config.custom.REGISTRATION_CHARGE){
+      return res.successResponse({msg: `Difference in actual approval amount and amount shown on application. Please contact administrator`}, 200, null, false, "Insufficient amount");      
+    }
+
+    var approver = await Person.findOne({id: payload.uid});
+
+    if(approver.aw < sails.config.custom.REGISTRATION_CHARGE){
+      return res.successResponse({msg: `Insufficient Balance. Min amount needed for approval is ${sails.config.custom.REGISTRATION_CHARGE}`}, 200, null, false, "Insufficient amount");
+    }
+
+
   }
 };
 

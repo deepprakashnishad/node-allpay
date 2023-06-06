@@ -30,6 +30,10 @@ module.exports = {
         permission: 'CREATE_PERSON'
     },{
         permission: 'UPDATE_PERSON'
+    },{
+        permission: 'APPROVE_REGISTRATION'
+    },{
+        permission: 'APPROVE_WITHDRAWL_REQUEST'
     }],
     Role: [{
         name: 'ADMIN'
@@ -40,8 +44,8 @@ module.exports = {
     }],
 
     Person:[{
-        name: 'Administrator',
-        email: 'admin@ournetwork.com',
-        mobile:'+917007788122'
+        n: 'Administrator',
+        e: 'admin@ournetwork.com',
+        m:'+917007788122'
     }],
 };

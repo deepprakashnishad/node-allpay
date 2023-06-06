@@ -28,14 +28,20 @@ module.exports = {
     try{
       var user;
       var person;
-      var users = await UserLogin.find({or: [
-        {"m": req.body.m.replace(/[- )(]/g,'')},
-        {"e": req.body.e},
-      ]});
-      var persons = await Person.find({or: [
-        {"m": req.body.m.replace(/[- )(]/g,'')},
-        {"e": req.body.e},
-      ]});
+      if(req.body.e===null || req.body.e==="" || req.body.e==="null"){
+        var users = await UserLogin.find({"m": req.body.m.replace(/[- )(]/g,'')});
+        var persons = await Person.find({"m": req.body.m.replace(/[- )(]/g,'')});
+      }else{
+        var users = await UserLogin.find({or: [
+          {"m": req.body.m.replace(/[- )(]/g,'')},
+          {"e": req.body.e},
+        ]});
+        var persons = await Person.find({or: [
+          {"m": req.body.m.replace(/[- )(]/g,'')},
+          {"e": req.body.e},
+        ]});  
+      }
+      
       if(users.length > 0 || persons.length > 0){
         return res.successResponse({code: "Duplicate user"}, 400, null, false, "Email or mobile already registered");
       }
@@ -47,7 +53,6 @@ module.exports = {
       })
       .intercept('UsageError', (err)=>{return new Error("err.message")}).fetch();
 
-      console.log(person);
       if(person){
         var role = "GUEST"
         var role = await Role.findOne({name: role}).populate("permissions");

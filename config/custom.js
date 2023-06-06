@@ -29,5 +29,11 @@ module.exports.custom = {
     ]
   },
 
-  GOOGLE_RECAPTCHA_KEY: ""
+  GOOGLE_RECAPTCHA_KEY: "",
+
+  MAX_DIST_LEVEL: 9,
+
+  DIST_PERCENT: [50, 10, 5, 5, 2, 4, 2, 5, 2],
+
+  REGISTRATION_CHARGE: 2000
 };

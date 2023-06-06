@@ -46,9 +46,9 @@ function doSeed(callback) {
 
 async function createFirstUserLogin(){
   if(await UserLogin.count()==0){
-    var person = await Person.findOne({"mobile": "+917007788122"});
+    var person = await Person.findOne({"m": "+917007788122"});
     if(person){
-      let user = await UserLogin.create({"mobile": "+917007788122", "password":"admin", "person": person.id, "loginType": "Portal"}).fetch();
+      let user = await UserLogin.create({"m": "+917007788122", "pass":"admin", "p": person.id, "lt": "Portal"}).fetch();
       sails.log.debug("User seed successfully planted. Following are details: ");
       sails.log.debug("Userid: "+person.mobile);
       sails.log.debug("Person: "+person.id);
@@ -79,12 +79,12 @@ async function assignPermissionToRoles() {
 }
 
 async function assignPermissionToFirstAdmin(){
-  var person = await Person.findOne({"mobile":"+917007788122"}).populate("permissions");
+  var person = await Person.findOne({"m":"+917007788122"}).populate("permissions");
   if(person){
     const adminRole = await Role.findOne({name: "ADMIN"}).populate("permissions");
-    if(person.role==null){
+    if(person.r==null){
       sails.log.debug('Assigning role to first admin user');
-      await Person.update({id:person.id}, {role: adminRole.id});
+      await Person.update({id:person.id}, {r: adminRole.id});
       sails.log.debug('Role assigned successfully');
     }else{
       sails.log.debug(("Role already assigned").grey);
@@ -113,9 +113,9 @@ function getPermissionIds(permissions) {
 async function createIndices(){
   sails.log.debug(("Creating indices").grey);
   db = Person.getDatastore().manager;
-  var result = await db.collection(Person.tableName).createIndexes( { name: 1, mobile: 1, email: 1 } );
+  var result = await db.collection(Person.tableName).createIndexes( { n: 1, m: 1, e: 1 } );
   db = UserLogin.getDatastore().manager;
-  var result = await db.collection(UserLogin.tableName).createIndexes( { loginType: 1, mobile: 1, email: 1 } );
+  var result = await db.collection(UserLogin.tableName).createIndexes( { lt: 1, m: 1, e: 1 } );
   sails.log.debug(("Indices created").grey);
 }
 

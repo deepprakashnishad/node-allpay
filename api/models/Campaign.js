@@ -20,52 +20,25 @@ module.exports = {
         type: "number",
         defaultsTo: 2000000
     },
-    fixed:{ // Fixed Cost
-        type:"number",
-        defaultsTo: 1200000
-    },
-    rCost:{
-        type: "number",
-        defaultsTo:800000
-    },
     clct:{ //Collected Till date
         type: "number",
         defaultsTo:0
     },
-    bplan:{ //Business Plan
-        type: "string",
-    },
-    usp:{ // Unique selling point of bussiness
-        type: "string"
-    },
-    aroi:{ //Annual ROI
-        type: "number",
-        defaultsTo:60
-    },
-    sTime:{ //Setup Time in days
-        type: "number",
-        defaultsTo: 90
-    },
-    bTime: { //Breakeven time in days
-        type: "number",
-        defaultsTo: 365
-    },
     s:{ //Status
         type: "string",
-        isIn: ['Active', 'Pending', 'Deleted'],
+        isIn: ['Active', 'Pending', 'Deleted', 'Paused', 'Suspended', 'Draft', 'Blacklisted'],
         defaultsTo: 'Active'
     },
     owner: {
         model: "Person",
         required: true  
     },
-    invl: {//Investors list 
-        collection: "CrowdInvestment",
-        via: "pr"
-    },
     cat: { //Category or Domain
         type: "string",
         required: true
+    },
+    expiryDate: {
+        type:"number"
     }
   },
 };

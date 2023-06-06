@@ -58,7 +58,19 @@ module.exports.routes = {
   'GET /Person/get': {controller: "Person", action:"fetchFilteredList"},  
   'PATCH /Person/assignPermission': {controller: "Person", action:"assignPermissionToPerson"},  
   'PATCH /Person/removePermission': {controller: "Person", action:"removePermissionFromPerson"}, 
-  'PATCH /Person/updatePermissionCollection': {controller: "Person", action:"updatePermissions"}, 
+  'PATCH /Person/updatePermissionCollection': {controller: "Person", action:"updatePermissions"},
+  'POST /Person/approveNewJoinee': {controller: "Person", action:"approveNewJoinee"},
+
+  'POST /Admin/approveRegistration': {controller: "Admin", action:"approveRegistration"}, 
+  'POST /Admin/nextOrbitActivation': {controller: "Admin", action:"nextOrbitActivation"}, 
+
+  'POST /Campaign': {controller: "Campaign", action:"create"}, 
+  'PATCH /Campaign': {controller: "Campaign", action:"update"},
+  'DELETE /Campaign': {controller: "Campaign", action:"delete"},
+  'GET /Campaign': {controller: "Campaign", action:"list"},
+  'GET /Campaign/:id': {controller: "Campaign", action:"get"},
+
+  'POST /Generic/submit-contact-details': {controller: "Generic", action:"submitContactDetails"}, 
 
   'GET /Test/firebase': { controller: "TestController", action: "initializeFirebase"}
 };

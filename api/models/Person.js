@@ -24,7 +24,6 @@ module.exports = {
     e:{ // Email
         type:"string",
         isEmail: true,
-        unique: true,
         allowNull: true
     },
     ev:{ //Is email verified
@@ -45,16 +44,16 @@ module.exports = {
         model: "person"
     },
     ul: { //Uplines
-        type: "json",
-        defaultsTo: []
-    },
-    ulc:{ //Uplines collection
         collection: "person"
+    },
+    lwdlc:{ // Level wise downline count. Level 1(Direct downline) is index 0
+        type: "json",
+        defaultsTo: {}
     },
     s:{ //Status
         type: "string",
-        isIn: ['Active', 'Pending', 'Deleted'],
-        defaultsTo: 'Active'
+        isIn: ['APPROVAL_PENDING', 'ACTIVE', 'SUSPENDED', 'DELETED', 'BLACKLISTED'],
+        defaultsTo: 'APPROVAL_PENDING'
     },
     pamt:{ //Paid Amount
         type: "number",
@@ -69,6 +68,10 @@ module.exports = {
         defaultsTo: 0
     },
     tac: { //Total Amount collected - Coming through team growth
+        type: "number",
+        defaultsTo: 0
+    },
+    acnl: { //Amount collected for next level
         type: "number",
         defaultsTo: 0
     },
@@ -98,6 +101,10 @@ module.exports = {
     },
     pan: { //Pan Card
         type: "string"
+    },
+    noc: { //Next orbit contribution collection
+        type: "number",
+        defaultsTo: 0
     }
   },
 };

@@ -21,9 +21,8 @@ module.exports = {
     },
     e:{ //Email
         type:"String",
-        unique: true,
-        allowNull: true,
-        isEmail: true
+        isEmail: true,
+        allowNull: true
     },
     m:{ //Mobile
         type:"string",
