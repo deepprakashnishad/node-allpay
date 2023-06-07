@@ -87,7 +87,7 @@ module.exports = {
       				updateOne: {
       					filter: {"_id": ObjectId(uplines[i])},
       					update: {
-  							"$inc": {"tac": dist_amt[k], "aw": dist_amt[k]*0.8, "ts": 1, "acnl": dist_amt[k]*0.2}
+  							"$inc": {"tac": dist_amt[k], "aw": dist_amt[k]*0.78, "ts": 1, "acnl": dist_amt[k]*0.2, "dq": dist_amt[k]*0.02}
       					}
       				}
       			});
@@ -205,7 +205,7 @@ module.exports = {
       				updateOne: {
       					filter: {"_id": ObjectId(uplines[i].id), "curr_orbit": {"$gt": curr_orbit}},
       					update: {
-  							"$inc": {"tac": dist_amt[k], "aw": dist_amt[k]*0.8, "acnl": dist_amt[k]*0.2}
+  							"$inc": {"tac": dist_amt[k], "aw": dist_amt[k]*0.78, "acnl": dist_amt[k]*0.2, "dq": dist_amt[k]*0.02}
       					}
       				}
       			});

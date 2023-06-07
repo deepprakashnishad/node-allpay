@@ -484,17 +484,49 @@ module.exports = {
     payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization})
     .tolerate(()=>{});
 
-    if(req.body.amount !== sails.config.custom.REGISTRATION_CHARGE){
-      return res.successResponse({msg: `Difference in actual approval amount and amount shown on application. Please contact administrator`}, 200, null, false, "Insufficient amount");      
+    if(req.body.amount !== sails.config.custom.REGISTRATION_CHARGE + sails.config.custom.REGISTRATION_CHARGE*sails.config.custom.DONATION_PERCENT_OF_PAID_AMOUNT){
+      return res.successResponse({}, 200, null, false, "Amount invalid. Please contact administrator.");      
     }
 
     var approver = await Person.findOne({id: payload.uid});
-
     if(approver.aw < sails.config.custom.REGISTRATION_CHARGE){
       return res.successResponse({msg: `Insufficient Balance. Min amount needed for approval is ${sails.config.custom.REGISTRATION_CHARGE}`}, 200, null, false, "Insufficient amount");
     }
 
+    await sails.helpers.approveNewJoinee.with({
+      personId: req.body.newJoineeId, 
+      approverId: payload.uid,
+      amount: req.body.amount
+    })
+    .intercept('invalid_amount', (e)=>{
+      // console.log(e);
+      return res.successResponse({code: "Invalid Amount"}, 500, null, false, "Invalid Amount");
+    });
 
+    var person = await Person.findOne({id: req.body.newJoineeId});
+    if(person.status==="ACTIVE"){
+      return res.successResponse(person, 200, null, true, "Approval successful");
+    }else{
+      return res.successResponse(person, 400, null, false, "Approval Failed");
+    }
+  },
+
+  updateProfileImages: async function(req, res){
+    payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization})
+    .tolerate(()=>{});
+
+    try{
+      if(req.body.field==="adh_f"){
+        await Person.updateOne({id: payload.uid}).set({"adh_f": req.body.data});
+      }else if(req.body.field==="adh_b"){
+        await Person.updateOne({id: payload.uid}).set({"adh_b": req.body.data});
+      }else if(req.body.field==="pic"){
+        await Person.updateOne({id: payload.uid}).set({"pic": req.body.data});
+      }  
+      return res.successResponse({"success": true}, 200, null, true, "Update successful");
+    }catch(e){
+      return res.successResponse({"success": false}, 400, null, false, "Update failed");
+    }
   }
 };
 

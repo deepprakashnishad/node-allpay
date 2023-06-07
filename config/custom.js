@@ -29,11 +29,24 @@ module.exports.custom = {
     ]
   },
 
+  RAZORPAY: {
+    keyId: "rzp_test_OhtTwkr00dbNU1",
+    keySecret: "ceaEtmg5bpuW11w6l565mt3U",
+    url: {
+      createOrder: "https://api.razorpay.com/v1/orders",
+      capture: "https://api.razorpay.com/v1/payments/:payment_id/capture",
+      paymentStatus: "https://api.razorpay.com/v1/payments/:payment_id",
+      fetchPaymentsByOrderId: "https://api.razorpay.com/v1/orders/:order_id/payments"
+    }
+  },
+
   GOOGLE_RECAPTCHA_KEY: "",
 
   MAX_DIST_LEVEL: 9,
 
   DIST_PERCENT: [50, 10, 5, 5, 2, 4, 2, 5, 2],
 
-  REGISTRATION_CHARGE: 2000
+  DONATION_PERCENT_OF_PAID_AMOUNT: 0.1,
+
+  REGISTRATION_CHARGE: 1000
 };

@@ -71,6 +71,10 @@ module.exports = {
         type: "number",
         defaultsTo: 0
     },
+    dq: { //Donation Quota
+        type: "number",
+        defaultsTo: 0
+    },
     acnl: { //Amount collected for next level
         type: "number",
         defaultsTo: 0
@@ -94,17 +98,13 @@ module.exports = {
         type: "string"
     },
     adh_f: { //Aadhar front Url
-        type: "string"
+        type: "json"
     },
     adh_b: { //Aadhar back Url
-        type: "string"
+        type: "json"
     },
     pan: { //Pan Card
-        type: "string"
-    },
-    noc: { //Next orbit contribution collection
-        type: "number",
-        defaultsTo: 0
+        type: "json"
     }
   },
 };

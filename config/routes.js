@@ -60,6 +60,7 @@ module.exports.routes = {
   'PATCH /Person/removePermission': {controller: "Person", action:"removePermissionFromPerson"}, 
   'PATCH /Person/updatePermissionCollection': {controller: "Person", action:"updatePermissions"},
   'POST /Person/approveNewJoinee': {controller: "Person", action:"approveNewJoinee"},
+  'POST /Person/updateProfileImages': {controller: "Person", action: "updateProfileImages"},
 
   'POST /Admin/approveRegistration': {controller: "Admin", action:"approveRegistration"}, 
   'POST /Admin/nextOrbitActivation': {controller: "Admin", action:"nextOrbitActivation"}, 
@@ -69,6 +70,9 @@ module.exports.routes = {
   'DELETE /Campaign': {controller: "Campaign", action:"delete"},
   'GET /Campaign': {controller: "Campaign", action:"list"},
   'GET /Campaign/:id': {controller: "Campaign", action:"get"},
+
+  'POST /Payment': {controller: "Payment", action:"create"}, 
+  'POST /Payment/verifyRazorpayPayment': {controller: "Payment", action:"verifyRazorpayPayment"}, 
 
   'POST /Generic/submit-contact-details': {controller: "Generic", action:"submitContactDetails"}, 
 

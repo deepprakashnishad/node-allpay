@@ -10,6 +10,7 @@
     "@sailshq/socket.io-redis": "^5.2.0",
     "ajv": "^6.5.3",
     "async": "3.2.4",
+    "axios": "^0.21.1",
     "grunt": "^1.6.1",
     "jsonwebtoken": "^9.0.0",
     "sails": "^1.5.4",
