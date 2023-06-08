@@ -95,7 +95,7 @@ module.exports = {
         via: "p"
     },
     pic: { //Profile pic url
-        type: "string"
+        type: "json"
     },
     adh_f: { //Aadhar front Url
         type: "json"
