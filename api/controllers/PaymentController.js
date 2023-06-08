@@ -5,8 +5,6 @@ module.exports = {
 	create: async function(req, res){
 		var data = req.body;
 
-
-
 		if(data['product']==="Starter Plan Activation"){
 			data['amount'] = sails.config.custom.REGISTRATION_CHARGE + sails.config.custom.REGISTRATION_CHARGE*sails.config.custom.DONATION_PERCENT_OF_PAID_AMOUNT;
 		}
@@ -25,8 +23,6 @@ module.exports = {
 			attempts: result['attempts'],
 	    }
 	    payment['success'] = true;
-
-	    console.log(payment);
 
 	    return res.successResponse(payment, 201, null, true, "Payment drafted successfully");
 	},
