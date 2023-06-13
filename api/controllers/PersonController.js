@@ -476,7 +476,7 @@ module.exports = {
         success: true
       }, 200, null, true, "Person found");
     }else{
-      return res.successResponse({success: false}, 404, null, true, "Person not found");
+      return res.successResponse({success: false, msg: "Person not found"}, 404, null, false, "Person not found");
     }  
   },
 
@@ -504,10 +504,10 @@ module.exports = {
     });
 
     var person = await Person.findOne({id: req.body.newJoineeId});
-    if(person.status==="ACTIVE"){
+    if(person.s==="ACTIVE"){
       return res.successResponse(person, 200, null, true, "Approval successful");
     }else{
-      return res.successResponse(person, 400, null, false, "Approval Failed");
+      return res.successResponse(person, 200, null, false, "Approval Failed");
     }
   },
 
