@@ -32,6 +32,7 @@ module.exports = {
     success: {},
     person_not_found: {"success": false, "msg": "Person not found"},
     approver_not_found: {"success": false, "msg": "Approver not found"},
+    already_registered: {"success": false, "msg": "Person already registered"},
     insufficient_balance: {"success": false, "msg":"Insufficient Balance", "description": "Insufficient Balance."},
     invalid_amount: {"success": false, "msg": "Invalid amount"},
     dbError: {success: false, "msg": "Some database error occured"}
@@ -66,7 +67,7 @@ module.exports = {
       return exits.success(false);
     }
     if(person.s!=="APPROVAL_PENDING"){
-      return res.successResponse({msg: "Person is already registered"}, 403, null, false, "Person is already registered");
+      throw "already_registered";
     }
 
     var client = Person.getDatastore().manager.client;
@@ -95,6 +96,7 @@ module.exports = {
       await session.withTransaction(async () => {
           const personColl = Person.getDatastore().manager.collection(Person.tableName);
           const approvalLogCollection = ApprovalLog.getDatastore().manager.collection(ApprovalLog.tableName);
+          const globalEarningColl = GlobalEarning.getDatastore().manager.collection(GlobalEarning.tableName);
           // Important:: You must pass the session to the operations
 
           if(inputs.isPaidApproval){
@@ -103,7 +105,7 @@ module.exports = {
           else if(!inputs.isPaidApproval && inputs.approverId){
             var result = await personColl.updateOne({
               "_id": ObjectId(inputs.approverId)}, 
-              {"$inc": {"aw": -1*inputs.amount, "taw": inputs.amount}}, 
+              {"$inc": {"aw": -1*Math.abs(inputs.amount), "taw": Math.abs(inputs.amount)}}, 
               {session}
             );
 
@@ -125,7 +127,11 @@ module.exports = {
             }
           }, {session});
 
-          await personColl.updateOne({"_id": parentId}, {"$set": {"ddl": ddl}}, {session});
+          await personColl.updateOne({"_id": parentId}, 
+            {
+              "$set": {"ddl": ddl},
+              "$inc": {"team.s": 1}
+            }, {session});
 
           for(var i=uplines.length-1, k=0; i>=0; i--, k++){
             await personColl.updateOne({"_id": ObjectId(uplines[i])}, {
@@ -144,7 +150,18 @@ module.exports = {
                 }, {session});
           }
 
-          // var result2 = await personColl.bulkWrite(operations, {ordered: true}, {session});
+          var currDate = new Date();
+          await globalEarningColl.updateOne(
+            {"ged": `${currDate.getDate()}/${currDate.getMonth()+1}/${currDate.getFullYear()}`},
+            {
+              "$inc": {
+                "tc": joiningAmount*sails.config.custom.GLOBAL_COMMISSION/100,
+                "dc.new_joining": joiningAmount*sails.config.custom.GLOBAL_COMMISSION/100
+              }
+            },
+            {"upsert": true},
+            {session}
+          );
       }, transactionOptions);   
       return exits.success(true);
     } catch(e){

@@ -55,6 +55,7 @@ module.exports.routes = {
   'GET /Person/getCustomers': {controller: "Person", action:"getCustomers"},  
   'GET /Person/queryCustomers': {controller: "Person", action:"queryCustomers"},  
   'GET /Person/getTotalCustomers': {controller: "Person", action:"getTotalCustomers"},  
+  'GET /Person/updatePersonPlatform': {controller: "Person", action:"updatePersonPlatform"},  
   'GET /Person/get': {controller: "Person", action:"fetchFilteredList"},  
   'PATCH /Person/assignPermission': {controller: "Person", action:"assignPermissionToPerson"},  
   'PATCH /Person/removePermission': {controller: "Person", action:"removePermissionFromPerson"}, 
@@ -64,6 +65,7 @@ module.exports.routes = {
 
   'POST /Admin/approveRegistration': {controller: "Admin", action:"approveRegistration"}, 
   'POST /Admin/nextOrbitActivation': {controller: "Admin", action:"nextOrbitActivation"}, 
+  'GET /Admin/distributeGlobalCommission': {controller: "Admin", action:"distributeGlobalCommission"}, 
 
   'POST /Campaign': {controller: "Campaign", action:"create"}, 
   'PATCH /Campaign': {controller: "Campaign", action:"update"},

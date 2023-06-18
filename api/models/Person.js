@@ -55,6 +55,15 @@ module.exports = {
         isIn: ['APPROVAL_PENDING', 'ACTIVE', 'SUSPENDED', 'DELETED', 'BLACKLISTED'],
         defaultsTo: 'APPROVAL_PENDING'
     },
+    pf: { //Platform - Silver, Gold, Diamond, Platinum
+        type: "string",
+        isIn: ['s', 'g', 'd', 'p'],
+        defaultsTo: 's'
+    },
+    team: {
+        type: "json",
+        defaultsTo: {}
+    },
     pamt:{ //Paid Amount
         type: "number",
         defaultsTo: 0

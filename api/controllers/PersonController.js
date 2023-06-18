@@ -463,7 +463,12 @@ module.exports = {
   },
 
   getReferrer: async function(req, res){
-    var result = await Person.findOne({m: req.query.strQuery}).populate("p");
+    if(req.query.type==="referrer"){
+      var result = await Person.findOne({m: req.query.strQuery, curr_orbit: {">": 0}}).populate("p");
+    }else{
+      var result = await Person.findOne({m: req.query.strQuery}).populate("p");
+    }
+    
     if(result){
       return res.successResponse({
         id: result.id, 
@@ -522,11 +527,194 @@ module.exports = {
         await Person.updateOne({id: payload.uid}).set({"adh_b": req.body.data});
       }else if(req.body.field==="pic"){
         await Person.updateOne({id: payload.uid}).set({"pic": req.body.data});
+      }else if(req.body.field==="pan"){
+        await Person.updateOne({id: payload.uid}).set({"pan": req.body.data});
       }  
       return res.successResponse({"success": true}, 200, null, true, "Update successful");
     }catch(e){
       return res.successResponse({"success": false}, 400, null, false, "Update failed");
     }
+  },
+
+  transferCoins: async function(req, res){
+    payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization})
+    .tolerate(()=>{});
+
+    if(!payload.uid){
+      return res.successResponse({"success": false}, 403, null, false, "Unauthorized access"); 
+    }
+
+    try{
+      var client = Person.getDatastore().manager.client;
+      var session = client.startSession();
+
+      const transactionOptions = {
+        readPreference: 'primary',
+        readConcern: { level: 'local' },
+        writeConcern: { w: 'majority' }
+      };
+
+      var personId=ObjectId(payload.uid);
+      var recieverId = ObjectId(req.body.recieverId)
+
+      var person = await Person.findOne({"_id": payload.uid});
+      var reciever = await Person.findOne({"_id": req.body.recieverId});
+
+      var transactions = await Transaction.getDatastore().manager.collection(Transaction.tableName)
+                          .aggregate([
+                            {
+                              "$match": {"p": {"$in": [personId, recieverId]}}
+                            },
+                            {
+                              "$sort": {"p": 1, "createdAt": 1}
+                            },
+                            {
+                              "$group": {
+                                "p": "$p",
+                                "lastEntry": {"$last": "$createdAt"}
+                              }
+                            }
+                          ]);
+
+      console.log(transactions);
+
+      if(transactions.length===0){
+        var recieverBal = reciever.aw + reciever.dq + reciever.acnl;
+        var personBal = person.aw + person.dq + person.acnl;
+      }
+
+      if(person.aw < req.body.amount){
+        return res.successResponse({"success": false}, 200, null, false, `Insufficient funds. Only ${person.aw} points are available`);
+      }
+
+      try {
+        await session.withTransaction(async () => {
+            const personColl = Person.getDatastore().manager.collection(Person.tableName);
+            const transColl = Transaction.getDatastore().manager.collection(Transaction.tableName);
+
+            var result1 = await personColl.updateOne({
+              "_id": ObjectId(inputs.personId)}, 
+              {"$inc": {"aw": -1*Math.abs(inputs.amount), "taw": Math.abs(inputs.amount)}}, 
+              {session}
+            );
+
+            var result2 = await personColl.updateOne({
+              "_id": ObjectId(inputs.recieverId)}, 
+              {"$inc": {"aw": Math.abs(inputs.amount)}}, 
+              {session}
+            );
+
+            var transR1 = await transColl.insertOne({ 
+                "p": ObjectId(inputs.personId),
+                "a": req.body.amount,
+                "c": `Transferred to ${reciever.n} with mobile ${reciever.m}`,
+                "c_d": "d",
+                "b": 1000,
+                "createdAt": new Date()
+              }, 
+              {session}
+            );
+
+            await personColl.updateOne({"_id": personId}, {
+              "$set": {
+                s: "ACTIVE",
+                pamt: inputs.amount,
+                curr_orbit: 1,
+                ul: uplines,
+                dq: donationAmount
+              }
+            }, {session});
+
+            await personColl.updateOne({"_id": parentId}, {"$set": {"ddl": ddl}}, {session});
+
+            for(var i=uplines.length-1, k=0; i>=0; i--, k++){
+              await personColl.updateOne({"_id": ObjectId(uplines[i])}, {
+                  "$inc": {
+                    "tac": dist_amt[k], 
+                    "aw": dist_amt[k]*0.8, 
+                    "ts": 1, 
+                    "acnl": dist_amt[k]*0.18, 
+                    "dq": dist_amt[k]*0.02
+                  }
+                }, {session}
+              );
+              
+              await personColl.updateOne({"_id": ObjectId(uplines[i])}, {
+                  "$inc": {[`lwdlc.${k+1}.count`]: 1, [`lwdlc.${k+1}.1`]: 1}
+                  }, {session});
+            }
+
+            // var result2 = await personColl.bulkWrite(operations, {ordered: true}, {session});
+        }, transactionOptions);   
+        return exits.success(true);
+      } catch(e){
+        console.log(e);
+        throw "dbError";
+      }
+      finally {
+          await session.endSession();
+      }
+
+    }catch(e){
+      return res.successResponse({"success": false}, 400, null, false, "Update failed");
+    }
+  },
+
+  updatePersonPlatform: async function(req, res){
+    const isAuthorized = await sails.helpers.authorizeUser
+    .with({token: req.headers.authorization, "permission": "CREATE_PERMISSION"})
+    .intercept('tokenExpired', ()=>{
+      return res.successResponse({code:"tokenExpired"}, 403, null, false, "Permission denied. Token Expired.");
+    })
+    .intercept('invalidToken', ()=>{
+      return res.successResponse({code: "invalidToken"}, 403, null, false, "Permission denied");
+    }).intercept('dbError', ()=>{
+      return res.successResponse({code: "dbError"}, 500, null, false, "Some database error occured");
+    });
+
+    if(isAuthorized){
+      const personColl = Person.getDatastore().manager.collection(Person.tableName);
+
+      var result = await personColl.updateMany({
+        "ddl.9": {$exists: false},
+      }, {
+        "$set": {
+          "pf": "s",
+          "team": {"s":0, "g":0, "d":0, "p": 0}
+        }
+      });
+
+      var result = await personColl.updateMany({
+        "team.s": {">": 9},
+        "pf": "s"
+      }, {
+        "$set": {
+          "pf": "g"
+        }
+      });
+
+      var result = await personColl.updateMany({
+        "team.g": {">": 4},
+        "pf": "g"
+      }, {
+        "$set": {
+          "pf": "d"
+        }
+      });
+
+      var result = await personColl.updateMany({
+        "team.d": {">": 2},
+        "pf": "d"
+      }, {
+        "$set": {
+          "pf": "p"
+        }
+      });
+      
+      return res.successResponse({code: "success"}, 200, null, false, "Success");
+    }
+
+    return res.successResponse({code: "invalidToken"}, 403, null, false, "Permission denied");
   }
 };
 

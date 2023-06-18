@@ -240,5 +240,67 @@ module.exports = {
 	    }else{
 	    	return res.successResponse({msg: "Permission denied"}, 403, null, false, "Permission denied");
 	    }
+	},
+
+	distributeGlobalCommission: async function(req, res) {
+
+		var currDate = new Date();
+
+		currDate = `${currDate.getDate()-1}/${currDate.getMonth() + 1}/${currDate.getFullYear()}`;
+
+		var globalEarning = await GlobalEarning.findOne({'ged': currDate});
+
+		var total_collection = globalEarning.tc;
+
+	 	const personColl = Person.getDatastore().manager.collection(Person.tableName);
+
+	 	var aggCursor = personColl.aggregate([
+	 		{
+	 			"$match": {"s": "ACTIVE"}
+	 		},
+	 		{
+		 		"$group": {
+		 			_id: "$pf",
+
+		 			count: {
+		 				$count: {}
+		 			}
+	 			}
+	 	}]);
+
+	 	// await GlobalEarning.updateOne({"id": globalEarning.id}).set({"s": "d"});
+
+	 	for await (const doc of aggCursor) {
+		    if(doc._id==="s"){
+		    	var silverAmt = total_collection/doc.count;
+
+		    	await personColl.updateMany(
+		    		{"s": "ACTIVE", "curr_orbit": {"$gt": 0}, "pf": "s"}, 
+		    		{"$inc": {"tac": silverAmt, "aw": silverAmt}}
+		    	);
+		    }
+		    if(doc._id==="g"){
+		    	var goldAmt = total_collection/doc.count;
+		    	await personColl.updateMany(
+		    		{"s": "ACTIVE", "curr_orbit": {"$gt": 0}, "pf": "g"}, 
+		    		{"$inc": {"tac": silverAmt, "aw": silverAmt+goldAmt}}
+		    	);
+		    }
+		    if(doc._id==="d"){
+		    	var diamondAmt = total_collection/doc.count;
+		    	await personColl.updateMany(
+		    		{"s": "ACTIVE", "curr_orbit": {"$gt": 0}, "pf": "d"}, 
+		    		{"$inc": {"tac": silverAmt, "aw": silverAmt+goldAmt+diamondAmt}}
+		    	);
+		    }
+		    if(doc._id==="p"){
+		    	var platinumAmt = total_collection/doc.count;
+		    	await personColl.updateMany(
+		    		{"s": "ACTIVE", "curr_orbit": {"$gt": 0}, "pf": "p"}, 
+		    		{"$inc": {"tac": silverAmt, "aw": silverAmt+goldAmt+diamondAmt+platinumAmt}}
+		    	);
+		    }
+		}
+	 	res.successResponse({msg: "result"}, 200, null, true, "Update success");
 	}
 }
