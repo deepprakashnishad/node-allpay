@@ -16,10 +16,6 @@ module.exports = {
         type:"number",
         required: true
     },
-    b:{ //Balance
-        type: "number",
-        defaultsTo:0
-    },
     c:{ // comment
         type: "string",
         defaultsTo: ""

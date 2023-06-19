@@ -560,24 +560,6 @@ module.exports = {
       var person = await Person.findOne({"_id": payload.uid});
       var reciever = await Person.findOne({"_id": req.body.recieverId});
 
-      var transactions = await Transaction.getDatastore().manager.collection(Transaction.tableName)
-                          .aggregate([
-                            {
-                              "$match": {"p": {"$in": [personId, recieverId]}}
-                            },
-                            {
-                              "$sort": {"p": 1, "createdAt": 1}
-                            },
-                            {
-                              "$group": {
-                                "p": "$p",
-                                "lastEntry": {"$last": "$createdAt"}
-                              }
-                            }
-                          ]);
-
-      console.log(transactions);
-
       if(transactions.length===0){
         var recieverBal = reciever.aw + reciever.dq + reciever.acnl;
         var personBal = person.aw + person.dq + person.acnl;
@@ -593,58 +575,35 @@ module.exports = {
             const transColl = Transaction.getDatastore().manager.collection(Transaction.tableName);
 
             var result1 = await personColl.updateOne({
-              "_id": ObjectId(inputs.personId)}, 
-              {"$inc": {"aw": -1*Math.abs(inputs.amount), "taw": Math.abs(inputs.amount)}}, 
+              "_id": ObjectId(payload.uid)}, 
+              {"$inc": {"aw": -1*Math.abs(inputs.amount), "taw": -1*Math.abs(inputs.amount)}}, 
               {session}
             );
 
             var result2 = await personColl.updateOne({
-              "_id": ObjectId(inputs.recieverId)}, 
-              {"$inc": {"aw": Math.abs(inputs.amount)}}, 
+              "_id": ObjectId(req.body.recieverId)}, 
+              {"$inc": {"aw": Math.abs(inputs.amount), "taw": Math.abs(inputs.amount)}}, 
               {session}
             );
 
             var transR1 = await transColl.insertOne({ 
-                "p": ObjectId(inputs.personId),
+                "p": ObjectId(payload.uid),
                 "a": req.body.amount,
                 "c": `Transferred to ${reciever.n} with mobile ${reciever.m}`,
-                "c_d": "d",
-                "b": 1000,
-                "createdAt": new Date()
+                "c_d": "d"
               }, 
               {session}
             );
 
-            await personColl.updateOne({"_id": personId}, {
-              "$set": {
-                s: "ACTIVE",
-                pamt: inputs.amount,
-                curr_orbit: 1,
-                ul: uplines,
-                dq: donationAmount
-              }
-            }, {session});
+            var transR2 = await transColl.insertOne({ 
+                "p": ObjectId(req.body.recieverId),
+                "a": req.body.amount,
+                "c": `Recieved from ${person.n} with mobile ${person.m}`,
+                "c_d": "d"
+              }, 
+              {session}
+            );
 
-            await personColl.updateOne({"_id": parentId}, {"$set": {"ddl": ddl}}, {session});
-
-            for(var i=uplines.length-1, k=0; i>=0; i--, k++){
-              await personColl.updateOne({"_id": ObjectId(uplines[i])}, {
-                  "$inc": {
-                    "tac": dist_amt[k], 
-                    "aw": dist_amt[k]*0.8, 
-                    "ts": 1, 
-                    "acnl": dist_amt[k]*0.18, 
-                    "dq": dist_amt[k]*0.02
-                  }
-                }, {session}
-              );
-              
-              await personColl.updateOne({"_id": ObjectId(uplines[i])}, {
-                  "$inc": {[`lwdlc.${k+1}.count`]: 1, [`lwdlc.${k+1}.1`]: 1}
-                  }, {session});
-            }
-
-            // var result2 = await personColl.bulkWrite(operations, {ordered: true}, {session});
         }, transactionOptions);   
         return exits.success(true);
       } catch(e){
@@ -710,7 +669,7 @@ module.exports = {
           "pf": "p"
         }
       });
-      
+
       return res.successResponse({code: "success"}, 200, null, false, "Success");
     }
 
