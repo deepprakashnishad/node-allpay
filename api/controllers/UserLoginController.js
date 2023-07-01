@@ -158,18 +158,17 @@ module.exports = {
     try{
       var users = await UserLogin.find({
          or: [
-           {'mobile': req.body.username.replace(/[- )(]/g,'')},
-           {'email': req.body.username},
+           {'m': req.body.username.replace(/[- )(]/g,'')},
+           {'e': req.body.username},
          ],
-         'loginType': "Portal"
+         'lt': "Portal"
         }
-      ).populate("person");
+      ).populate("p");
       
       if(users.length == 0){
         return res.successResponse({success: true, msg: "User not found"}, 404, null);
       }
       var user = users[0];
-      console.log(user);
       var result = await ResetCode.find({"username": req.body.username});
       if(result.length == 0){
         code = Math.floor(100000 + Math.random() * 900000);
@@ -183,7 +182,13 @@ module.exports = {
           code = result[0]['code'];
         }
       }
-      await mailer.sendForgotPassword({"name": `${user.person.name}`, "email": user.email, "code": code});
+      await mailer.sendForgotPassword({
+        "name": user.p.n, 
+        "email": user.e, 
+        "code": code,
+        "protocol": req.headers['x-forwarded-proto'] || req.protocol,
+        "host": req.headers.host
+      });
       res.successResponse({success: true, msg: "Reset code sent"}, 200, null);
     }catch(e){
       console.log(e);
@@ -329,23 +334,29 @@ module.exports = {
         return res.successResponse({"success": false, "msg": "Verification code expired"}, 202);
       }
 
+      console.log(newPassword);
+
       var user = await UserLogin.updateOne({
         or: [
-           {'mobile': req.body.username.replace(/[- )(]/g,'')},
-           {'email': req.body.username},
+           {'m': req.body.username.replace(/[- )(]/g,'')},
+           {'e': req.body.username},
          ],
-         'loginType': "Portal"
-      }, {password: newPassword});
+         'lt': "Portal"
+      }, {pass: newPassword});
 
-      await ResetCode.destroy({'username': req.body.username});
+
+
       if(user){
+        console.log(req.body.username);
         var person = await Person.find({
           or: [
-             {'mobile': req.body.username.replace(/[- )(]/g,'')},
-             {'email': req.body.username},
+             {'m': req.body.username.replace(/[- )(]/g,'')},
+             {'e': req.body.username},
            ]
         });
-        await mailer.sendPasswordUpdatedMail({name: person[0].name, email: person[0].email, subject: "Password updated successfully"});
+        console.log(person);
+        await mailer.sendPasswordUpdatedMail({name: person[0].n, email: person[0].e, subject: "Password updated successfully"});
+        await ResetCode.destroy({'username': req.body.username});
         return res.successResponse({"success": true, "msg": "Password updated successfully"}, 200, "Password updated");
       }else{
         return res.successResponse(user, 404, "User not found");

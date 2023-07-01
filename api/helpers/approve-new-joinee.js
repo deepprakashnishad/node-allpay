@@ -97,6 +97,7 @@ module.exports = {
           const personColl = Person.getDatastore().manager.collection(Person.tableName);
           const approvalLogCollection = ApprovalLog.getDatastore().manager.collection(ApprovalLog.tableName);
           const globalEarningColl = GlobalEarning.getDatastore().manager.collection(GlobalEarning.tableName);
+          const transColl = Transaction.getDatastore().manager.collection(Transaction.tableName);
           // Important:: You must pass the session to the operations
 
           if(inputs.isPaidApproval){
@@ -113,6 +114,15 @@ module.exports = {
               return exits.success(false);
             }
             await approvalLogCollection.insertOne({p: inputs.personId, a: inputs.approverId}, {session});
+
+            var transR1 = await transColl.insertOne({ 
+                "p": ObjectId(inputs.approverId),
+                "a": Math.abs(inputs.amount),
+                "c": `Approved person ${person.n} with mobile ${person.m}`,
+                "c_d": "d"
+              }, 
+              {session}
+            );
           }else if(!inputs.isPaidApproval && !inputs.approverId){
             throw "approver_not_found";
           }
@@ -123,7 +133,9 @@ module.exports = {
               pamt: inputs.amount,
               curr_orbit: 1,
               ul: uplines,
-              dq: donationAmount
+              dq: donationAmount,
+              pf: "s",
+              "pfd.s": (new Date()).getTime()
             }
           }, {session});
 
@@ -148,6 +160,15 @@ module.exports = {
             await personColl.updateOne({"_id": ObjectId(uplines[i])}, {
                 "$inc": {[`lwdlc.${k+1}.count`]: 1, [`lwdlc.${k+1}.1`]: 1}
                 }, {session});
+
+            await transColl.insertOne({ 
+                "p": ObjectId(uplines[i]),
+                "a": Math.abs(dist_amt[k]),
+                "c": `New Joinee ${person.n} at level ${k+1}`,
+                "c_d": "c"
+              }, 
+              {session}
+            );
           }
 
           var currDate = new Date();

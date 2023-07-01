@@ -3,11 +3,13 @@ module.exports.sendForgotPassword = function(obj) {
  	"forgotPassword", 
  	{
  		name: obj.name,
- 		code: obj.code
+ 		code: obj.code,
+ 		protocol: obj.protocol,
+ 		host: obj.host
  	},
  	{
 		to: obj.email,
-		subject: "Everything Satvik - Reset password"
+		subject: "Good Act - Reset password"
  	},
 	function(err) {console.log(err ||"Mail Sent!");}
 	)

@@ -1,9 +1,4 @@
-/**
- * PersonController
- *
- * @description :: Server-side actions for handling incoming requests.
- * @help        :: See https://sailsjs.com/docs/concepts/actions
- */
+const {ObjectId} = require('mongodb');
 
 module.exports = {
   /**
@@ -536,7 +531,7 @@ module.exports = {
     }
   },
 
-  transferCoins: async function(req, res){
+  transferCredits: async function(req, res){
     payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization})
     .tolerate(()=>{});
 
@@ -553,17 +548,14 @@ module.exports = {
         readConcern: { level: 'local' },
         writeConcern: { w: 'majority' }
       };
-
       var personId=ObjectId(payload.uid);
       var recieverId = ObjectId(req.body.recieverId)
 
-      var person = await Person.findOne({"_id": payload.uid});
-      var reciever = await Person.findOne({"_id": req.body.recieverId});
+      var person = await Person.findOne({"id": payload.uid});
+      var reciever = await Person.findOne({"id": req.body.recieverId});
 
-      if(transactions.length===0){
-        var recieverBal = reciever.aw + reciever.dq + reciever.acnl;
-        var personBal = person.aw + person.dq + person.acnl;
-      }
+      // var recieverBal = reciever.aw + reciever.dq + reciever.acnl;
+      // var personBal = person.aw + person.dq + person.acnl;
 
       if(person.aw < req.body.amount){
         return res.successResponse({"success": false}, 200, null, false, `Insufficient funds. Only ${person.aw} points are available`);
@@ -576,13 +568,13 @@ module.exports = {
 
             var result1 = await personColl.updateOne({
               "_id": ObjectId(payload.uid)}, 
-              {"$inc": {"aw": -1*Math.abs(inputs.amount), "taw": -1*Math.abs(inputs.amount)}}, 
+              {"$inc": {"aw": -1*Math.abs(req.body.amount), "taw": Math.abs(req.body.amount)}}, 
               {session}
             );
 
             var result2 = await personColl.updateOne({
               "_id": ObjectId(req.body.recieverId)}, 
-              {"$inc": {"aw": Math.abs(inputs.amount), "taw": Math.abs(inputs.amount)}}, 
+              {"$inc": {"aw": Math.abs(req.body.amount)}}, 
               {session}
             );
 
@@ -599,13 +591,13 @@ module.exports = {
                 "p": ObjectId(req.body.recieverId),
                 "a": req.body.amount,
                 "c": `Recieved from ${person.n} with mobile ${person.m}`,
-                "c_d": "d"
+                "c_d": "c"
               }, 
               {session}
             );
 
         }, transactionOptions);   
-        return exits.success(true);
+        return res.successResponse({}, 200, null, true, "Transfer successful");
       } catch(e){
         console.log(e);
         throw "dbError";
@@ -615,6 +607,7 @@ module.exports = {
       }
 
     }catch(e){
+      console.log(e);
       return res.successResponse({"success": false}, 400, null, false, "Update failed");
     }
   },
@@ -648,7 +641,8 @@ module.exports = {
         "pf": "s"
       }, {
         "$set": {
-          "pf": "g"
+          "pf": "g",
+          "pfd.g": (new Date()).getTime()
         }
       });
 
@@ -657,7 +651,8 @@ module.exports = {
         "pf": "g"
       }, {
         "$set": {
-          "pf": "d"
+          "pf": "d",
+          "pfd.d": (new Date()).getTime()
         }
       });
 
@@ -666,7 +661,8 @@ module.exports = {
         "pf": "d"
       }, {
         "$set": {
-          "pf": "p"
+          "pf": "p",
+          "pfd.p": (new Date()).getTime()
         }
       });
 
@@ -674,6 +670,45 @@ module.exports = {
     }
 
     return res.successResponse({code: "invalidToken"}, 403, null, false, "Permission denied");
+  },
+
+  getTransactions: async function(req, res){
+    payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization})
+    .tolerate(()=>{});
+
+    if(!payload){
+      return res.successResponse({code: "invalidToken"}, 403, null, false, "Permission denied"); 
+    }
+
+    const transColl = Transaction.getDatastore().manager.collection(Transaction.tableName);
+
+    if(!req.query.endDate){
+      var currDate = new Date();
+      req.query.endDate = `${currDate.getFullYear()}/${currDate.getMonth()+1}/${currDate.getDate()+1}`
+    }
+
+    if(!req.query.startDate){
+      var today = new Date();
+      var priorDate = new Date(new Date().setDate(today.getDate() - 30));
+      req.query.startDate = `${priorDate.getFullYear()}/${priorDate.getMonth()+1}/${priorDate.getDate()}`
+    }
+
+    await transColl.aggregate([
+      {
+        "$match": {
+          "p": ObjectId(payload.uid),
+          "_id": {"$gte": await sails.helpers.objectidFromTimestamp.with({"mDate": req.query.startDate})},
+          "_id": {"$lt": await sails.helpers.objectidFromTimestamp.with({"mDate": req.query.endDate})},
+        }
+      },
+    ]).toArray(async(err, results)=>{
+      if(err){
+        return res.serverError(err);
+      }  
+
+      console.log(results)
+      return res.successResponse(results, 200, null, true, "Transactions fetched successfully");
+    });
   }
 };
 

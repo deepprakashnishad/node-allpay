@@ -1,0 +1,12 @@
+Hi <%= name %>,
+
+We have received a request to reset the password for your account.
+
+<h2>Password reset code is <%= code %></h2>
+
+If you made this request, please click on the link below or paste this into your browser to complete the process:
+
+<%= protocol %>://<%= host %>/password-reset/<%= code %>
+
+This link will work for 24 hours or until your password is reset.
+If you did not ask to change your password, please ignore this email and your account will remain unchanged.

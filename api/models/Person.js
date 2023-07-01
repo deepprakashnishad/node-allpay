@@ -57,8 +57,11 @@ module.exports = {
     },
     pf: { //Platform - Silver, Gold, Diamond, Platinum
         type: "string",
-        isIn: ['s', 'g', 'd', 'p'],
-        defaultsTo: 's'
+        isIn: ['s', 'g', 'd', 'p']
+    },
+    pfd:{ //Platform aquisition date
+        type: "json",
+        defaultsTo: {}
     },
     team: {
         type: "json",

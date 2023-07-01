@@ -7,24 +7,24 @@
 
 module.exports = {
 
-  attributes: {
-    p:{ // Person
-        model: "Person",
-        required: true
-    },
-    a:{ // Amount
-        type:"number",
-        required: true
-    },
-    c:{ // comment
-        type: "string",
-        defaultsTo: ""
-    },
-    c_d:{ //Credit or Debit
-        type: "string",
-        isIn: ['c', 'd'],
-        defaultsTo: 'd'
+    attributes: {
+        p:{ // Person
+            model: "Person",
+            required: true
+        },
+        a:{ // Amount
+            type:"number",
+            required: true
+        },
+        c:{ // comment
+            type: "string",
+            defaultsTo: ""
+        },
+        c_d:{ //Credit or Debit
+            type: "string",
+            isIn: ['c', 'd'],
+            defaultsTo: 'd'
+        }
     }
-  },
 };
 

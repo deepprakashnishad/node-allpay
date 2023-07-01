@@ -16,6 +16,12 @@ module.exports = {
 			type: "string",
 			isIn: ['p', 'd'], //p - Pending, d - Distributed
 			defaultsTo: "p"
-		}
+		},
+		dpd: { //Distribution person detail
+			type: "json"	
+		},
+		dad: { //Levelwise amount distribution
+			type: "json"	
+		},
 	}
 }

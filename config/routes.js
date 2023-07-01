@@ -56,12 +56,14 @@ module.exports.routes = {
   'GET /Person/queryCustomers': {controller: "Person", action:"queryCustomers"},  
   'GET /Person/getTotalCustomers': {controller: "Person", action:"getTotalCustomers"},  
   'GET /Person/updatePersonPlatform': {controller: "Person", action:"updatePersonPlatform"},  
-  'GET /Person/get': {controller: "Person", action:"fetchFilteredList"},  
+  'GET /Person/get': {controller: "Person", action:"fetchFilteredList"},
+  'GET /Person/getTransactions': {controller: "Person", action:"getTransactions"},  
   'PATCH /Person/assignPermission': {controller: "Person", action:"assignPermissionToPerson"},  
   'PATCH /Person/removePermission': {controller: "Person", action:"removePermissionFromPerson"}, 
   'PATCH /Person/updatePermissionCollection': {controller: "Person", action:"updatePermissions"},
   'POST /Person/approveNewJoinee': {controller: "Person", action:"approveNewJoinee"},
   'POST /Person/updateProfileImages': {controller: "Person", action: "updateProfileImages"},
+  'POST /Person/transferCredits': {controller: "Person", action: "transferCredits"},
 
   'POST /Admin/approveRegistration': {controller: "Admin", action:"approveRegistration"}, 
   'POST /Admin/nextOrbitActivation': {controller: "Admin", action:"nextOrbitActivation"}, 
@@ -75,6 +77,9 @@ module.exports.routes = {
 
   'POST /Payment': {controller: "Payment", action:"create"}, 
   'POST /Payment/verifyRazorpayPayment': {controller: "Payment", action:"verifyRazorpayPayment"}, 
+
+  'GET /Report/daily-transaction-report': {controller: "Report", action: "getDailyTransactionReport"},
+  'GET /Report/global-earning-report': {controller: "Report", action: "getGlobalEarningReport"},
 
   'POST /Generic/submit-contact-details': {controller: "Generic", action:"submitContactDetails"}, 
 

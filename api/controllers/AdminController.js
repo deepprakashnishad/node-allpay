@@ -248,11 +248,31 @@ module.exports = {
 
 		currDate = `${currDate.getDate()-1}/${currDate.getMonth() + 1}/${currDate.getFullYear()}`;
 
-		var globalEarning = await GlobalEarning.findOne({'ged': currDate});
+		var globalEarning = await GlobalEarning.findOne({'ged': currDate, 'ds': "p"});
 
 		var total_collection = globalEarning.tc;
 
 	 	const personColl = Person.getDatastore().manager.collection(Person.tableName);
+
+	 	/*var persons = personColl.aggregate([
+	 		{
+	 			"$match": {"s": "ACTIVE"}
+	 		},
+			  {
+			    "$group": {
+			      "_id": "$pf",
+			      "personIds": {
+			        "$push": {"$toString": "$_id"}
+			      }
+			    }
+			  }
+		]);
+
+		var person_group = {};
+
+		for await (var person of persons){
+			person_group[person._id] = person.personIds;
+		}*/
 
 	 	var aggCursor = personColl.aggregate([
 	 		{
@@ -272,7 +292,7 @@ module.exports = {
 
 	 	for await (const doc of aggCursor) {
 		    if(doc._id==="s"){
-		    	var silverAmt = total_collection/doc.count;
+		    	var silverAmt = (total_collection*sails.config.custom.SILVER_PERCENT)/doc.count;
 
 		    	await personColl.updateMany(
 		    		{"s": "ACTIVE", "curr_orbit": {"$gt": 0}, "pf": "s"}, 
@@ -280,27 +300,33 @@ module.exports = {
 		    	);
 		    }
 		    if(doc._id==="g"){
-		    	var goldAmt = total_collection/doc.count;
+		    	var goldAmt = (total_collection*sails.config.custom.GOLD_PERCENT)/doc.count;
 		    	await personColl.updateMany(
 		    		{"s": "ACTIVE", "curr_orbit": {"$gt": 0}, "pf": "g"}, 
-		    		{"$inc": {"tac": silverAmt, "aw": silverAmt+goldAmt}}
+		    		{"$inc": {"tac": goldAmt, "aw": goldAmt}}
 		    	);
 		    }
 		    if(doc._id==="d"){
-		    	var diamondAmt = total_collection/doc.count;
+		    	var diamondAmt = (total_collection*sails.config.custom.DIAMOND_PERCENT)/doc.count;
 		    	await personColl.updateMany(
 		    		{"s": "ACTIVE", "curr_orbit": {"$gt": 0}, "pf": "d"}, 
-		    		{"$inc": {"tac": silverAmt, "aw": silverAmt+goldAmt+diamondAmt}}
+		    		{"$inc": {"tac": diamondAmt, "aw": diamondAmt}}
 		    	);
 		    }
 		    if(doc._id==="p"){
-		    	var platinumAmt = total_collection/doc.count;
+		    	var platinumAmt = (total_collection*sails.config.custom.PLATINUM_PERCENT)/doc.count;
 		    	await personColl.updateMany(
 		    		{"s": "ACTIVE", "curr_orbit": {"$gt": 0}, "pf": "p"}, 
-		    		{"$inc": {"tac": silverAmt, "aw": silverAmt+goldAmt+diamondAmt+platinumAmt}}
+		    		{"$inc": {"tac": platinumAmt, "aw": platinumAmt}}
 		    	);
 		    }
 		}
+
+		await GlobalEarning.update({'ged': currDate}).set({
+			"ds": "d", 
+			// "dpd": person_group, 
+			"dad":{ "s": silverAmt, "g": goldAmt, "d": diamondAmt, "p": platinumAmt}
+		}); 
 	 	res.successResponse({msg: "result"}, 200, null, true, "Update success");
 	}
 }
