@@ -493,6 +493,11 @@ module.exports = {
       return res.successResponse({msg: `Insufficient Balance. Min amount needed for approval is ${sails.config.custom.REGISTRATION_CHARGE}`}, 200, null, false, "Insufficient amount");
     }
 
+    var newPerson = await Person.findOne({id: req.body.newJoineeId});
+    if(newPerson.s!=="APPROVAL_PENDING"){
+      return res.successResponse({msg: `Person is already approved`}, 200, null, false, "Person is already approved");
+    }    
+
     await sails.helpers.approveNewJoinee.with({
       personId: req.body.newJoineeId, 
       approverId: payload.uid,
