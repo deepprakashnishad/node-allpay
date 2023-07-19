@@ -49,7 +49,7 @@ module.exports.datastores = {
     *                                                                          *
     ***************************************************************************/
     adapter: 'sails-mongo',
-    url: "mongodb+srv://deepprakashnishad:XVeMxYePFuydWrGZ@cluster0.pxxdo8w.mongodb.net/good-act-dev?retryWrites=true&w=majority"
+    url: "mongodb+srv://deepprakashnishad:pLplwQ0vW2ppqXjd@cluster0.kppqnrz.mongodb.net/all-pay?retryWrites=true&w=majority"
     // url: "mongodb+srv://deepexaltech:Ypuru8GibgK0hfsk@cluster0.m3clwfl.mongodb.net/my-net?retryWrites=true&w=majority"
   },
 

@@ -24,6 +24,21 @@ module.exports.routes = {
   'POST /OTP/verifyOTPAndSignIn': {controller: "OTP", action: "verifyOTPAndSignIn"},
   'POST /OTP/requestOTP': {controller: "OTP", action: "requestOTP"},
 
+  'POST /Merchant': {controller: "Merchant", action: "create"},
+  'PATCH /Merchant': {controller: "Merchant", action: "update"},
+  'DELETE /Merchant/:id': {controller: "Merchant", action: "delete"},
+  'GET /Merchant': {controller: "Merchant", action: "get"},
+
+  'POST /PaymentGateway': {controller: "PaymentGateway", action: "create"},
+  'PATCH /PaymentGateway': {controller: "PaymentGateway", action: "update"},
+  'DELETE /PaymentGateway/:id': {controller: "PaymentGateway", action: "delete"},
+  'GET /PaymentGateway': {controller: "PaymentGateway", action: "get"},
+
+  'POST /BettingPartner': {controller: "BettingPartner", action: "create"},
+  'PATCH /BettingPartner': {controller: "BettingPartner", action: "update"},
+  'DELETE /BettingPartner/:id': {controller: "BettingPartner", action: "delete"},
+  'GET /BettingPartner': {controller: "BettingPartner", action: "get"},
+
   'POST /UserLogin': {controller: "UserLogin", action:"signup"},
   'DELETE /UserLogin/:personId': {controller: "UserLogin", action:"delete"},
   'PUT /UserLogin': {controller: "UserLogin", action:"update"},
@@ -51,29 +66,14 @@ module.exports.routes = {
   'PUT /Person': {controller: "Person", action:"update"},  
   'GET /Person': {controller: "Person", action:"get"},
   'GET /Person/getUserDetail': {controller: "Person", action:"getUserDetail"},
-  'GET /Person/getReferrer': {controller: "Person", action:"getReferrer"},
   'GET /Person/getCustomers': {controller: "Person", action:"getCustomers"},  
   'GET /Person/queryCustomers': {controller: "Person", action:"queryCustomers"},  
-  'GET /Person/getTotalCustomers': {controller: "Person", action:"getTotalCustomers"},  
-  'GET /Person/updatePersonPlatform': {controller: "Person", action:"updatePersonPlatform"},  
   'GET /Person/get': {controller: "Person", action:"fetchFilteredList"},
   'GET /Person/getTransactions': {controller: "Person", action:"getTransactions"},  
   'PATCH /Person/assignPermission': {controller: "Person", action:"assignPermissionToPerson"},  
   'PATCH /Person/removePermission': {controller: "Person", action:"removePermissionFromPerson"}, 
   'PATCH /Person/updatePermissionCollection': {controller: "Person", action:"updatePermissions"},
-  'POST /Person/approveNewJoinee': {controller: "Person", action:"approveNewJoinee"},
   'POST /Person/updateProfileImages': {controller: "Person", action: "updateProfileImages"},
-  'POST /Person/transferCredits': {controller: "Person", action: "transferCredits"},
-
-  'POST /Admin/approveRegistration': {controller: "Admin", action:"approveRegistration"}, 
-  'POST /Admin/nextOrbitActivation': {controller: "Admin", action:"nextOrbitActivation"}, 
-  'GET /Admin/distributeGlobalCommission': {controller: "Admin", action:"distributeGlobalCommission"}, 
-
-  'POST /Campaign': {controller: "Campaign", action:"create"}, 
-  'PATCH /Campaign': {controller: "Campaign", action:"update"},
-  'DELETE /Campaign': {controller: "Campaign", action:"delete"},
-  'GET /Campaign': {controller: "Campaign", action:"list"},
-  'GET /Campaign/:id': {controller: "Campaign", action:"get"},
 
   'POST /Payment': {controller: "Payment", action:"create"}, 
   'POST /Payment/verifyRazorpayPayment': {controller: "Payment", action:"verifyRazorpayPayment"}, 
@@ -82,7 +82,5 @@ module.exports.routes = {
   'GET /Report/global-earning-report': {controller: "Report", action: "getGlobalEarningReport"},
 
   'POST /Generic/submit-contact-details': {controller: "Generic", action:"submitContactDetails"}, 
-
-  'GET /Test/firebase': { controller: "TestController", action: "initializeFirebase"}
 };
 //Added to restart server

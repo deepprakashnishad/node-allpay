@@ -27,6 +27,8 @@ module.exports = function(data, statusCode, viewFilePath, success, msg) {
     result.msg = msg;
   }
 
+  console.log(result);
+
   // If the user-agent wants a JSON response, send json
   if (req.wantsJSON) {
     return res.status(statusCode).json(result);

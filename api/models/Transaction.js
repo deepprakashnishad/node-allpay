@@ -8,23 +8,45 @@
 module.exports = {
 
     attributes: {
-        p:{ // Person
-            model: "Person",
+        v:{ // Person
+            model: "Vendor",
             required: true
+        },
+        void:{ // Vendor Order Id
+            type: "string",
+            required: true
+        },
+        vuid: { // Vendor User Id
+            type: "string",
+            required: true  
+        },
+        vud: { // Vendor User Detail
+            type: "json"
+        },
+        m: { //Merchant
+            model: "Merchant"
         },
         a:{ // Amount
             type:"number",
             required: true
         },
-        c:{ // comment
+        pg: { // Payment Gateway
             type: "string",
-            defaultsTo: ""
+            required: true
         },
-        c_d:{ //Credit or Debit
+        pm: { //Payment Mode
             type: "string",
-            isIn: ['c', 'd'],
-            defaultsTo: 'd'
-        }
+            required: true
+        },
+        pd: {
+            type: "json"
+        },
+        ei: { // Extra Info
+            type:"json"
+        },
+        c:{ // comment
+            type: "string"
+        },
     }
 };
 
