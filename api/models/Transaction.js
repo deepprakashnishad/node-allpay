@@ -8,19 +8,19 @@
 module.exports = {
 
     attributes: {
-        v:{ // Person
-            model: "Vendor",
+        bp:{ // Person
+            model: "BettingPartner",
             required: true
         },
-        void:{ // Vendor Order Id
+        poid:{ // Betting partner Order Id
             type: "string",
             required: true
         },
-        vuid: { // Vendor User Id
+        puid: { // Partner User Id
             type: "string",
             required: true  
         },
-        vud: { // Vendor User Detail
+        pud: { // Partner User Detail
             type: "json"
         },
         m: { //Merchant
@@ -38,7 +38,7 @@ module.exports = {
             type: "string",
             required: true
         },
-        pd: {
+        pd: { //Payment description
             type: "json"
         },
         ei: { // Extra Info

@@ -84,4 +84,27 @@ module.exports = {
 	    	return res.successResponse({msg: "Permission denied"}, 403, null, false, "Permission denied");
 	    }
 	},
+
+	generatePartnerToken: async function(req, res){
+		const isAuthorized = await sails.helpers.authorizeUser.with
+	    ({token: req.headers.authorization, "permission": "CREATE_PERMISSION"})
+	    .intercept('tokenExpired', ()=>{
+	      return res.successResponse({code:"tokenExpired"}, 403, null, false, "Permission denied. Token Expired.");
+	    })
+	    .intercept('invalidToken', ()=>{
+	      return res.successResponse({code: "invalidToken"}, 403, null, false, "Permission denied");
+	    }).intercept('dbError', ()=>{
+	      return res.successResponse({code: "dbError"}, 500, null, false, "Some database error occured");
+	    });
+	    if(isAuthorized){
+	    	var passCode = await sails.helpers.randomStringGenerator();
+	    	var partner = await BettingPartner.updateOne({"id": req.body.partnerId}).set({"passcode": passCode});
+
+	    	var partnerToken = await sails.helpers.jwt.with({payload:{"passCode": passCode, "bpid": partner.id, "website":partner.website}, secretKey: sails.config.models.dataEncryptionKeys.merchantSecretKey});
+
+	    	return res.successResponse({"mToken": partnerToken}, 200, null, true, "Betting Partner token generated successfully");
+	    }else{
+	    	return res.successResponse({msg: "Permission denied"}, 403, null, false, "Permission denied");
+	    }
+	},
 }

@@ -28,16 +28,22 @@ module.exports.routes = {
   'PATCH /Merchant': {controller: "Merchant", action: "update"},
   'DELETE /Merchant/:id': {controller: "Merchant", action: "delete"},
   'GET /Merchant': {controller: "Merchant", action: "get"},
+  'GET /Merchant/getPartners': {controller: "Merchant", action: "getPartners"},
+  'POST /Merchant/generateMerchantToken': {controller: "Merchant", action: "generateMerchantToken"},
 
   'POST /PaymentGateway': {controller: "PaymentGateway", action: "create"},
   'PATCH /PaymentGateway': {controller: "PaymentGateway", action: "update"},
   'DELETE /PaymentGateway/:id': {controller: "PaymentGateway", action: "delete"},
   'GET /PaymentGateway': {controller: "PaymentGateway", action: "get"},
+  'GET /PaymentGateway/availablePGM': {controller: "PaymentGateway", action: "availablePGM"},
+  'PATCH /PaymentGateway/initializePGM': {controller: "PaymentGateway", action: "initializePGM"},
+  'POST /PaymentGateway/redirectToPayment': {controller: "PaymentGateway", action: "redirectToPayment"},
 
   'POST /BettingPartner': {controller: "BettingPartner", action: "create"},
   'PATCH /BettingPartner': {controller: "BettingPartner", action: "update"},
   'DELETE /BettingPartner/:id': {controller: "BettingPartner", action: "delete"},
   'GET /BettingPartner': {controller: "BettingPartner", action: "get"},
+  'POST /BettingPartner/generatePartnerToken': {controller: "BettingPartner", action: "generatePartnerToken"},
 
   'POST /UserLogin': {controller: "UserLogin", action:"signup"},
   'DELETE /UserLogin/:personId': {controller: "UserLogin", action:"delete"},
@@ -80,6 +86,8 @@ module.exports.routes = {
 
   'GET /Report/daily-transaction-report': {controller: "Report", action: "getDailyTransactionReport"},
   'GET /Report/global-earning-report': {controller: "Report", action: "getGlobalEarningReport"},
+
+  'POST /Transaction': {controller: "Transaction", action:"create"}, 
 
   'POST /Generic/submit-contact-details': {controller: "Generic", action:"submitContactDetails"}, 
 };

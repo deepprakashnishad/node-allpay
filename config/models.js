@@ -104,6 +104,7 @@ module.exports.models = {
     default: '5+iANXYSD8pJQBErsJXdLvwmAXOmfnIDiuw9GLg34ZQ=',
     passHashKey:'hbLzR6nn0F7FuVq34XA1M7G9P33ek0fj1Uz9h010=',
     jwtSecretKey:'hbLzR6mm0F7FuVq6NXBkM7G9PAXlD3ek0fj1Uz9h010=',
+    merchantSecretKey: 'eyJwYXNzQ29kZSI6IlBNMVk5a1pJdUhQdFdWODB='
   },
 
 
