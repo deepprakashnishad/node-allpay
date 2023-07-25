@@ -112,7 +112,7 @@ module.exports = {
 		var m = paymentGatewayList[0]["m"];
 		var pg = paymentGatewayList[0]["pg"];
 
-		var encodedUrl = encodeURIComponent(`mid=${m['id']}&pg=${pg['name']}&pgid=${pg['id']}&amount={amount}&pbid=${bettingPartner['bpid']}&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}&username={username}&userphone={phone}&useremail={email}&extra_info_json={extra_info}`);
+		var encodedUrl = encodeURIComponent(`mid=${m['id']}&pg=${pg['name']}&pgid=${pg['id']}&amount={amount}&bpid=${bettingPartner['bpid']}&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}`);
 
 		var mLink = `${paymentGatewayList[0]['m']['website']}?${encodedUrl}`
 		return res.successResponse({link: mLink}, 200, null, true, "Link retrieved successfully");
