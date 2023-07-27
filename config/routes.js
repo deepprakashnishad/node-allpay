@@ -85,7 +85,7 @@ module.exports.routes = {
   'POST /Payment/verifyRazorpayPayment': {controller: "Payment", action:"verifyRazorpayPayment"}, 
 
   'GET /Report/daily-transaction-report': {controller: "Report", action: "getDailyTransactionReport"},
-  'GET /Report/global-earning-report': {controller: "Report", action: "getGlobalEarningReport"},
+  'GET /Report/transaction': {controller: "Report", action: "getTransactions"},
 
   'POST /Transaction': {controller: "Transaction", action:"create"}, 
 
