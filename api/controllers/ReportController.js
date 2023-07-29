@@ -97,7 +97,8 @@ module.exports = {
       {
         $group:{
           "_id": "$creationDate",
-          "amt": {"$sum": "$a"}
+          "amt": {"$sum": "$a"},
+          "cnt": {"$sum": 1},
         }
       }
     ]).toArray(async(err, results)=>{
@@ -107,4 +108,16 @@ module.exports = {
       return res.successResponse({txns: results}, 200, null, true, "Transactions fetched successfully");
     });
   },
+
+  getMerchantPGSummary: async function(req, res){
+    payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization})
+    .tolerate(()=>{});
+
+    if(!payload){
+      return res.successResponse({code: "invalidToken"}, 403, null, false, "Permission denied"); 
+    }
+
+    var result = await MerchantPG.find().populate("m").populate("pg");
+    return res.successResponse({txns: result}, 200, null, true, "Summary fetched successfully");
+  }
 }
