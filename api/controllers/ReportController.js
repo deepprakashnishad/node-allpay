@@ -81,6 +81,20 @@ module.exports = {
     var start = req.query.start;
     var end =req.query.end;
 
+    var period = "daily";
+    var format = "%d-%m-%Y";
+    if(req.query.period){
+      period = req.query.period;
+    }
+
+    if(period==="weekly"){
+      format = "%V-%Y";
+    }else if(period==="monthly"){
+      format = "%m-%Y";
+    }else if(period==="yearly"){
+      format = "%Y";
+    }
+
     const transColl = Transaction.getDatastore().manager.collection(Transaction.tableName);
 
     await transColl.aggregate([
@@ -91,7 +105,7 @@ module.exports = {
       },
       {
         $addFields: {
-          creationDate: {$dateToString: {"format": "%d-%m-%Y", "date": "$creationDate"}}
+          creationDate: {$dateToString: {"format": format, "date": "$creationDate"}}
         }
       },
       {
@@ -100,7 +114,8 @@ module.exports = {
           "amt": {"$sum": "$a"},
           "cnt": {"$sum": 1},
         }
-      }
+      },
+      {$sort: {"_id": 1}}
     ]).toArray(async(err, results)=>{
       if(err){
         return res.serverError(err);
