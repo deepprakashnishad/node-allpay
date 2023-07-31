@@ -63,7 +63,6 @@ module.exports = {
           }
         }else{
           var partner = await BettingPartner.findOne({id: payload.bpid});
-
           if(payload.passCode === partner.passcode){
             return exits.success(partner);
           }else{

@@ -105,17 +105,41 @@ module.exports = {
     		return res.successResponse(err, 500, null, false, "Passcode in token is invalid");
     	});
 
+    	var readLimit = sails.config.custom.LINK_READ_LIMIT;
+
 		var paymentGatewayList = await MerchantPG.find({select: ["m", "pg", "status", "priority"], where: {status: "ACTIVE"}})
 									.populate("m")
-									.populate("pg").sort({priority: 1});
+									.populate("pg").sort({priority: 1}).limit(readLimit);
+		var resLimit = 3;
+		var result = [];
 
-		var m = paymentGatewayList[0]["m"];
-		var pg = paymentGatewayList[0]["pg"];
+		if(req.query.limit){
+			resLimit = req.query.limit;
+		}
 
-		var encodedUrl = encodeURIComponent(`mid=${m['id']}&pg=${pg['name']}&pgid=${pg['id']}&amount={amount}&bpid=${bettingPartner['bpid']}&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}`);
+		if(resLimit > paymentGatewayList.length){
+			resLimit = paymentGatewayList.length;
+		}
 
-		var mLink = `${paymentGatewayList[0]['m']['website']}?${encodedUrl}`
-		return res.successResponse({link: mLink}, 200, null, true, "Link retrieved successfully");
+		if(readLimit > paymentGatewayList.length){
+			readLimit = paymentGatewayList.length;
+		}
+
+		for(var i=0; i<resLimit;i++){
+			var index = Math.floor(Math.random() * readLimit);
+
+			if(paymentGatewayList[index]){
+				var m = paymentGatewayList[index]["m"];
+				var pg = paymentGatewayList[index]["pg"];
+
+				var encodedUrl = encodeURIComponent(`mid=${m['id']}&pg=${pg['name']}&pgid=${pg['id']}&amount={amount}&bpid=${bettingPartner['bpid']}&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}`);
+				result.push(`${paymentGatewayList[index]['m']['website']}?${encodedUrl}`);
+				paymentGatewayList.splice(index, 1);
+				readLimit--;
+			}
+		}
+
+		return res.successResponse({links: result}, 200, null, true, "Link retrieved successfully");
 	},
 
 	initializePGM: async function(req, res){
