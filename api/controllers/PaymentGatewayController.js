@@ -110,7 +110,7 @@ module.exports = {
 		var paymentGatewayList = await MerchantPG.find({select: ["m", "pg", "status", "priority"], where: {status: "ACTIVE"}})
 									.populate("m")
 									.populate("pg").sort({priority: 1}).limit(readLimit);
-		var resLimit = 3;
+		var resLimit = 4;
 		var result = [];
 
 		if(req.query.limit){
@@ -127,12 +127,20 @@ module.exports = {
 
 		for(var i=0; i<resLimit;i++){
 			var index = Math.floor(Math.random() * readLimit);
-
+			console.log(paymentGatewayList[index]['m']);
+			if(paymentGatewayList[index]['m']['name']!=="Astratech Systems"){
+				i--;
+				continue;
+			}
 			if(paymentGatewayList[index]){
 				var m = paymentGatewayList[index]["m"];
 				var pg = paymentGatewayList[index]["pg"];
 
-				var encodedUrl = encodeURIComponent(`mid=${m['id']}&pg=${pg['name']}&pgid=${pg['id']}&amount={amount}&bpid=${bettingPartner['bpid']}&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}`);
+				var encodedUrl = encodeURIComponent(`mid=${m['id']}&pg=${pg['name']}
+					&pgid=${pg['id']}&amount={amount}&bpid=${bettingPartner['bpid']}
+					&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}
+					&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}
+					&allpayCallbackUrl={callbackurl}&betting_partner_name=${bettingPartner['name']}&betting_partner_logo={betting_partner_logo}`);
 				result.push(`${paymentGatewayList[index]['m']['website']}?${encodedUrl}`);
 				paymentGatewayList.splice(index, 1);
 				readLimit--;

@@ -89,6 +89,7 @@ module.exports.routes = {
   'GET /Report/merchant-pg-summary': {controller: "Report", action: "getMerchantPGSummary"},
 
   'POST /Transaction': {controller: "Transaction", action:"create"}, 
+  'GET /Transaction/getTransactionByPartnerOrderId': {controller: "Transaction", action:"getTransactionByPartnerOrderId"}, 
 
   'POST /Generic/submit-contact-details': {controller: "Generic", action:"submitContactDetails"}, 
 };
