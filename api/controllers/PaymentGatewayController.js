@@ -127,7 +127,8 @@ module.exports = {
 
 		for(var i=0; i<resLimit;i++){
 			var index = Math.floor(Math.random() * readLimit);
-			console.log(paymentGatewayList[index]['m']);
+
+			//To be removed
 			if(paymentGatewayList[index]['m']['name']!=="Astratech Systems"){
 				i--;
 				continue;
@@ -136,11 +137,22 @@ module.exports = {
 				var m = paymentGatewayList[index]["m"];
 				var pg = paymentGatewayList[index]["pg"];
 
-				var encodedUrl = encodeURIComponent(`mid=${m['id']}&pg=${pg['name']}
-					&pgid=${pg['id']}&amount={amount}&bpid=${bettingPartner['bpid']}
+				var encodedUrl = `mid=${encodeURIComponent(m['id'])}&pg=${encodeURIComponent(pg['name'])}
+					&pgid=${encodeURIComponent(pg['id'])}&amount={amount}&bpid=${encodeURIComponent(bettingPartner['bpid'])}
 					&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}
 					&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}
-					&allpayCallbackUrl={callbackurl}&betting_partner_name=${bettingPartner['name']}&betting_partner_logo={betting_partner_logo}`);
+					&allpayCallbackUrl={callbackurl}&betting_partner_name=${encodeURIComponent(bettingPartner['name'])}&betting_partner_logo={betting_partner_logo}`;
+
+				encodedUrl = encodedUrl.replace("{amount}", encodeURIComponent("45.00"))
+					.replace("{poid}", "Order321212x")
+					.replace("{userid}", "User3212")
+					.replace("{desc}", encodeURIComponent("Betting for cricket game india vs pak"))
+					.replace("{username}", "Deep")
+					.replace("{phone}", encodeURIComponent("+919028190340"))
+					.replace("{email}", encodeURIComponent("deep@gmail.com"))
+					.replace("{extra_info}", "{'test': 'test_value'}")
+					.replace("{allpayCallbackUrl}", "")
+					.replace("{betting_partner_logo}", encodeURIComponent("https://upload.wikimedia.org/wikipedia/commons/4/41/Dafabet_Kenya_Logo.png"))
 				result.push(`${paymentGatewayList[index]['m']['website']}?${encodedUrl}`);
 				paymentGatewayList.splice(index, 1);
 				readLimit--;
