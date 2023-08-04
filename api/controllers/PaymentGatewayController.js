@@ -140,7 +140,7 @@ module.exports = {
 				console.log(bettingPartner['id'])
 				var encodedUrl = `mid=${encodeURIComponent(m['id'])}&pg=${encodeURIComponent(pg['name'])}&pgid=${encodeURIComponent(pg['id'])}&amount={amount}&bpid=${bettingPartner['id']}&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}&allpayCallbackUrl={callbackurl}&betting_partner_name=${encodeURIComponent(bettingPartner['name'])}&betting_partner_logo={betting_partner_logo}&redirection_url={redirection_url}`;
 
-				encodedUrl = encodedUrl.replace("{amount}", encodeURIComponent("45.00"))
+				/*encodedUrl = encodedUrl.replace("{amount}", encodeURIComponent("45.00"))
 					.replace("{poid}", "Order321211x")
 					.replace("{userid}", "User3212")
 					.replace("{desc}", encodeURIComponent("Betting for cricket game india vs pak"))
@@ -150,7 +150,7 @@ module.exports = {
 					.replace("{extra_info}", encodeURIComponent("{'test': 'test_value'}"))
 					.replace("{allpayCallbackUrl}", "")
 					.replace("{betting_partner_logo}", encodeURIComponent("https://upload.wikimedia.org/wikipedia/commons/4/41/Dafabet_Kenya_Logo.png"))
-					.replace("{redirection_url}", encodeURIComponent("https://als.dfbocai.net/en/sports"))
+					.replace("{redirection_url}", encodeURIComponent("https://als.dfbocai.net/en/sports"))*/
 				result.push(`${paymentGatewayList[index]['m']['website']}?${encodedUrl}`);
 				paymentGatewayList.splice(index, 1);
 				readLimit--;

@@ -52,6 +52,7 @@ module.exports = {
           poid: 1,
           puid: 1,
           pud: 1,
+          pd: 1,
           "m._id": 1,
           "m.name": 1,
           a: 1,

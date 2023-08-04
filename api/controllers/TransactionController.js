@@ -29,7 +29,11 @@ module.exports = {
 		    }
 		    trans['m'] = merchant.id; 
 		    trans['a'] = req.body.amount; 
-		    trans['pg'] = req.body.paymentGatewayId; 
+		    if(req.body.paymentGateway){
+		    	trans['pg'] = req.body.paymentGateway	
+		    }else{
+		    	trans['pg'] = req.body.paymentGatewayId;	
+		    }		    
 		    trans['pm'] = req.body.paymentMode; 
 		    trans['pd'] = req.body.paymentDetails;
 		    trans['ei'] = req.body.extra_info; 
