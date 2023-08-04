@@ -17,8 +17,6 @@ module.exports = function(data, statusCode, viewFilePath, success, msg) {
   if(success){
     result.success = success;
   }
-
-  console.log(req.method);
   if(req.method==="OPTIONS"){
     res.set('Access-Control-Max-Age', '2592000');
   }
@@ -26,8 +24,6 @@ module.exports = function(data, statusCode, viewFilePath, success, msg) {
   if(msg){
     result.msg = msg;
   }
-
-  console.log(result);
 
   // If the user-agent wants a JSON response, send json
   if (req.wantsJSON) {

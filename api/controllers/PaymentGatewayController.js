@@ -138,7 +138,7 @@ module.exports = {
 				var pg = paymentGatewayList[index]["pg"];
 
 				var encodedUrl = `mid=${encodeURIComponent(m['id'])}&pg=${encodeURIComponent(pg['name'])}
-					&pgid=${encodeURIComponent(pg['id'])}&amount={amount}&bpid=${encodeURIComponent(bettingPartner['bpid'])}
+					&pgid=${encodeURIComponent(pg['id'])}&amount={amount}&bpid=${encodeURIComponent(bettingPartner['id'])}
 					&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}
 					&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}
 					&allpayCallbackUrl={callbackurl}&betting_partner_name=${encodeURIComponent(bettingPartner['name'])}&betting_partner_logo={betting_partner_logo}`;
@@ -150,7 +150,7 @@ module.exports = {
 					.replace("{username}", "Deep")
 					.replace("{phone}", encodeURIComponent("+919028190340"))
 					.replace("{email}", encodeURIComponent("deep@gmail.com"))
-					.replace("{extra_info}", "{'test': 'test_value'}")
+					.replace("{extra_info}", encodeURIComponent("{'test': 'test_value'}"))
 					.replace("{allpayCallbackUrl}", "")
 					.replace("{betting_partner_logo}", encodeURIComponent("https://upload.wikimedia.org/wikipedia/commons/4/41/Dafabet_Kenya_Logo.png"))
 				result.push(`${paymentGatewayList[index]['m']['website']}?${encodedUrl}`);
