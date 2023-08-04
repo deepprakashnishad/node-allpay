@@ -62,34 +62,14 @@ module.exports = {
 	        }
 	        console.log(paymentResult);
 	        if(paymentResult["status"]==="captured" || paymentResult["status"]==="authorized"){
-	          var payment = await Payment.updateOne({
-	            "id": req.body.payment_id
-	          }).set({
-	            transactionId: req.body.razorpay_payment_id,
-	            s: paymentResult["status"]
-	          });
-
-	          console.log(payment);
+	          console.log("Update database");
 	        }
 	      }catch(err){
 	        console.log(err);
 	        return res.successResponse({msg: "Failed to capture payment.", success: false}, 200, null, false, "Payment failed");        
 	      }
 	      
-	      res.successResponse({msg: "Payment successfully processed", success: true}, 200, null, true, "Payment successfull");
-
-          // Process network joining
-	      	if(payment.product==="Starter Plan Activation"){
-	      		await sails.helpers.approveNewJoinee.with({
-			      personId: payment.person, 
-			      amount: req.body.amount,
-			      isPaidApproval: true
-			    })
-			    .intercept('invalid_amount', (e)=>{
-			      // console.log(e);
-			      return res.successResponse({code: "Invalid Amount"}, 500, null, false, "Invalid Amount");
-			    });
-	      	}
+	      res.successResponse({pd: paymentResult, msg: "Payment successfully processed", success: true}, 200, null, true, "Payment successfull");
 	    }else{
 	      return res.successResponse({msg: "Signature mismatch. Try again later"}, 400, null, true, "Bad request");  
 	    }

@@ -17,13 +17,16 @@ module.exports = {
     		console.log(err);
     		return res.successResponse(err, 403, null, false, "Passcode in token is invalid");
     	});
-
 	    if(merchant){ 
 	    	var trans = {}; 
 	    	trans['bp'] = req.body.bpid;
 		    trans['poid'] = req.body.partnerOrderId; 
 		    trans['puid'] = req.body.partnerUserId; 
-		    trans['pud'] = req.body.partnerUserDetail; 
+		    if(req.body.partnerUserDetail){
+		    	trans['pud'] = req.body.partnerUserDetail;
+		    }else{
+		    	trans['pud'] = {username: req.body.username, phone: req.body.userphone, email: req.body.useremail}; 	
+		    }
 		    trans['m'] = merchant.id; 
 		    trans['a'] = req.body.amount; 
 		    trans['pg'] = req.body.paymentGatewayId; 

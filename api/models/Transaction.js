@@ -47,6 +47,9 @@ module.exports = {
         c:{ // comment
             type: "string"
         },
+        s: {
+            type: "string"
+        }
     }
 };
 
