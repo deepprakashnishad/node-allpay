@@ -25,12 +25,14 @@ module.exports = {
 		    if(req.body.partnerUserDetail){
 		    	trans['pud'] = req.body.partnerUserDetail;
 		    }else{
-		    	trans['pud'] = {username: req.body.username, phone: req.body.userphone, email: req.body.useremail}; 	
+		    	trans['pud'] = {username: req.body.username, phone: req.body.phone, email: req.body.email}; 	
 		    }
 		    trans['m'] = merchant.id; 
 		    trans['a'] = req.body.amount; 
 		    if(req.body.paymentGateway){
 		    	trans['pg'] = req.body.paymentGateway	
+		    }else if(req.body.pg){
+		    	trans['pg'] = req.body.pg
 		    }else{
 		    	trans['pg'] = req.body.paymentGatewayId;	
 		    }		    
