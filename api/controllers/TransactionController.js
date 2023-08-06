@@ -18,31 +18,30 @@ module.exports = {
     		return res.successResponse(err, 403, null, false, "Passcode in token is invalid");
     	});
 	    if(merchant){ 
-	    	var trans = {}; 
-	    	trans['bp'] = req.body.bpid;
-		    trans['poid'] = req.body.partnerOrderId; 
-		    trans['puid'] = req.body.partnerUserId; 
-		    if(req.body.partnerUserDetail){
-		    	trans['pud'] = req.body.partnerUserDetail;
-		    }else{
-		    	trans['pud'] = {username: req.body.username, phone: req.body.phone, email: req.body.email}; 	
-		    }
-		    trans['m'] = merchant.id; 
-		    trans['a'] = req.body.amount; 
-		    if(req.body.paymentGateway){
-		    	trans['pg'] = req.body.paymentGateway	
-		    }else if(req.body.pg){
-		    	trans['pg'] = req.body.pg
-		    }else{
-		    	trans['pg'] = req.body.paymentGatewayId;	
-		    }		    
-		    trans['pm'] = req.body.paymentMode; 
-		    trans['pd'] = req.body.paymentDetails;
-		    trans['ei'] = req.body.extra_info; 
-		    trans['c'] = req.body.comment; 
-		    trans['s'] = req.body.status.toUpperCase();
-
 	        try{ 
+	        	var trans = {}; 
+		    	trans['bp'] = req.body.bpid;
+			    trans['poid'] = req.body.partnerOrderId; 
+			    trans['puid'] = req.body.partnerUserId; 
+			    if(req.body.partnerUserDetail){
+			    	trans['pud'] = req.body.partnerUserDetail;
+			    }else{
+			    	trans['pud'] = {username: req.body.username, phone: req.body.phone, email: req.body.email}; 	
+			    }
+			    trans['m'] = merchant.id; 
+			    trans['a'] = req.body.amount; 
+			    if(req.body.paymentGateway){
+			    	trans['pg'] = req.body.paymentGateway	
+			    }else if(req.body.pg){
+			    	trans['pg'] = req.body.pg
+			    }else{
+			    	trans['pg'] = req.body.paymentGatewayId;	
+			    }		    
+			    trans['pm'] = req.body.paymentMode; 
+			    trans['pd'] = req.body.paymentDetails;
+			    trans['ei'] = req.body.extra_info; 
+			    trans['c'] = req.body.comment; 
+			    trans['s'] = req.body.status.toUpperCase();
 	        	var mTransaction = await Transaction.create(trans).fetch(); 
 		        res.successResponse({}, 201, null, true, "Transaction created"); 	
 		        if(req.body.allpayCallbackUrl){ 
@@ -56,7 +55,10 @@ module.exports = {
 		        	return;
 		        } 
 		    }catch(e){ 
-		    	console.log(e); return res.successResponse(e, 500, null, false, "Passcode in token is invalid"); 	 
+		    	console.log(req.headers);
+		    	console.log(req.body);
+		    	console.log(e); 
+		    	return res.successResponse(e, 500, null, false, "Passcode in token is invalid"); 	 
 	        }
 
 	    }else{
