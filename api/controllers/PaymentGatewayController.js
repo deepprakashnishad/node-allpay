@@ -129,17 +129,22 @@ module.exports = {
 			var index = Math.floor(Math.random() * readLimit);
 
 			//To be removed
-			if(paymentGatewayList[index]['m']['name']!=="Astratech Systems"){
+			/*if(paymentGatewayList[index]['m']['name']!=="Astratech Systems"){
 				i--;
 				continue;
-			}
+			}*/
 			if(paymentGatewayList[index]){
 				var m = paymentGatewayList[index]["m"];
 				var pg = paymentGatewayList[index]["pg"];
 
-				console.log(bettingPartner['id'])
-				var encodedUrl = `mid=${encodeURIComponent(m['id'])}&pg=${encodeURIComponent(pg['name'])}&pgid=${encodeURIComponent(pg['id'])}&amount={amount}&bpid=${bettingPartner['id']}&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}&allpayCallbackUrl={callbackurl}&betting_partner_name=${encodeURIComponent(bettingPartner['name'])}&betting_partner_logo={betting_partner_logo}&redirection_url={redirection_url}`;
-
+				// console.log(bettingPartner['id'])
+				var encodedUrl = `add-to-cart=91&mid=${encodeURIComponent(m['id'])}&pg=${encodeURIComponent(pg['name'])}&pgid=${encodeURIComponent(pg['id'])}&amount={amount}&bpid=${bettingPartner['id']}&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}&allpayCallbackUrl={callbackurl}&betting_partner_name=${encodeURIComponent(bettingPartner['name'])}&betting_partner_logo={betting_partner_logo}&redirection_url={redirection_url}`;
+				/*if(m['website'].indexOf("astratechsystems")>-1){
+					var encodedUrl = `add-to-cart=91&mid=${encodeURIComponent(m['id'])}&pg=${encodeURIComponent(pg['name'])}&pgid=${encodeURIComponent(pg['id'])}&amount={amount}&bpid=${bettingPartner['id']}&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}&allpayCallbackUrl={callbackurl}&betting_partner_name=${encodeURIComponent(bettingPartner['name'])}&betting_partner_logo={betting_partner_logo}&redirection_url={redirection_url}`;
+				}else{
+					var encodedUrl = `mid=${encodeURIComponent(m['id'])}&pg=${encodeURIComponent(pg['name'])}&pgid=${encodeURIComponent(pg['id'])}&amount={amount}&bpid=${bettingPartner['id']}&partner_orderid={poid}&partner_uid={userid}&prod_desc={desc}&username={username}&userphone={phone}&useremail={email}&extra_info={extra_info}&allpayCallbackUrl={callbackurl}&betting_partner_name=${encodeURIComponent(bettingPartner['name'])}&betting_partner_logo={betting_partner_logo}&redirection_url={redirection_url}`;
+				}*/
+				
 				/*encodedUrl = encodedUrl.replace("{amount}", encodeURIComponent(Math.floor(Math.random()*10000)))
 					.replace("{poid}", "Order"+await sails.helpers.randomStringGenerator.with({len:7}))
 					.replace("{userid}", "User3212")
