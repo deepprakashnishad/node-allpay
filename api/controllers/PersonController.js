@@ -18,28 +18,30 @@ module.exports = {
     });;
 
     if (isAuthorized) {
-      if(req.body.role===undefined || req.body.role===null){
-        req.body.role="GUEST";
+      console.log(req.body);
+      if(req.body.r===undefined || req.body.r===null || req.body.r==={}){
+        req.body.r="ADMIN";
       }
       var auth = req.headers.authorization;
-      if (auth) {
+      /*if (auth) {
         var tmp = auth.split(' ');   // Split on a space, the original auth looks like  "Basic Y2hhcmxlczoxMjM0NQ==" and we need the 2nd part
 
         var buf = new Buffer(tmp[1], 'base64'); // create a buffer and tell it the data coming in is base64
         var plain_auth = buf.toString();        // read it back out as a string
         var creds = plain_auth.split(':');      // split on a ':'
         var password = creds[1];
-      }else if(req.body.password){
-        var password = req.body.password;
+      }else */
+      if(req.body.pass){
+        var password = req.body.pass;
       }else{
         res.statusCode = 401;
         res.json({"success": false, "msg":"Credentials missing"});
         return;
       }
+      console.log(password);
       try{
         var user;
         var person;
-
         if(
           sails.config.custom.APP_CONFIG['authentication'].indexOf("email")>-1 &&
           !req.body.email && req.body.e.length===0){
@@ -73,26 +75,29 @@ module.exports = {
         if(req.body.e===""){
           req.body.e = null;
         }
-        person = await Person.create({n:req.body.n, m: m, e: req.body.e})
+        person = await Person.create({n:req.body.n, m: mobile, e: req.body.e})
         .intercept('E_UNIQUE', (err)=> {
           return res.successResponse({code: "duplicate"}, 200, null, false, "Email or mobile already in use");
         })
         .intercept('UsageError', (err)=>{return new Error("err.message")}).fetch();
         if(person){
-          var role = await Role.findOne({n: "GUEST"}).populate("permissions");
+          console.log(req.body.r);
+          var role = await Role.findOne({name: "ADMIN"}).populate("permissions");
+          console.log(role);
           if(role){
-            await Person.update({id: person.id}, {role: role.id});
+            await Person.update({id: person.id}, {r: role.id});
 
             var permissions = [];
             for (var i = 0; i <role.permissions.length; i++) {
               permissions[i] = role.permissions[i].id;
             }
+            console.log(permissions);
             await Person.addToCollection(person.id, "permissions").members(permissions);
           }
           
-          person = await Person.findOne({id: person.id}).populate("permissions").populate("role");
-          user = await UserLogin.create({loginType: "Portal", 
-          email: req.body.email, mobile: mobile, person: person.id, password: password })
+          person = await Person.findOne({id: person.id}).populate("permissions").populate("r");
+          user = await UserLogin.create({lt: "Portal", 
+          e: req.body.e, m: mobile, p: person.id, pass: password })
           .intercept('E_UNIQUE', async ()=> {
             await Person.destroyOne({id:person.id});
             return {"code":"usernameAlreadyInUse", "msg": "Username already taken"}
@@ -148,8 +153,19 @@ module.exports = {
     .tolerate(()=>{});
 
     if (payload && (isAuthorized || payload.id === req.body.id)) {
-      var person = await Person.updateOne({id: req.body.id}, {name:req.body.name, 
-      mobile: req.body.mobile, email: req.body.email, status: req.body.status, role: req.body.role.id})
+      var person = await Person.updateOne({id: req.body.id}).set({n:req.body.n, 
+      m: req.body.m, e: req.body.e, s: req.body.s})
+      .intercept('E_UNIQUE', ()=>{
+        return res.successResponse({msg: "Failed to update person"}, 400, null, false, "Failed to update person.");
+      })
+      .intercept('UsageError', (err)=>{
+        return res.successResponse({msg: "Failed to update person"}, 400, null, false, "Failed to update person.");
+      });
+      var userData = {m: req.body.m, e: req.body.e};
+      if(req.body.pass){
+        userData['pass'] = req.body.pass;
+      }
+      var user = await UserLogin.updateOne({p: req.body.id}).set(userData)
       .intercept('E_UNIQUE', ()=>{
         return res.successResponse({msg: "Failed to update person"}, 400, null, false, "Failed to update person.");
       })
@@ -159,7 +175,7 @@ module.exports = {
     } else {
         return res.successResponse({msg: "Permission denied"}, 403, null, false, "Permission denied");    
     }
-    return res.successResponse(person, 200, null, true, "Person with role ${req.body.role} created successfully");
+    return res.successResponse(person, 200, null, true, "Person updated successfully");
   },
 
   /**
@@ -173,10 +189,14 @@ module.exports = {
     payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization}).tolerate(()=>{});
     // return res.json({"payload":payload, "id":req.params.id, "isAuthorized":isAuthorized});
     if (payload && (isAuthorized || payload.id == req.params.id)) {
-      var person = await Person.destroy({id: req.params.id})
-      .intercept('UsageError', (err)=>{
-        return res.successResponse({msg: "Failed to delete person"}, 400, null, false, "Failed to delete person.");
-      }).fetch();  
+      var user = await UserLogin.destroyOne({p: req.params.id})
+                .intercept('UsageError', (err)=>{
+                  return res.successResponse({msg: "Failed to delete person"}, 400, null, false, "Failed to delete person.");
+                });
+      var person = await Person.destroyOne({id: req.params.id})
+                  .intercept('UsageError', (err)=>{
+                    return res.successResponse({msg: "Failed to delete person"}, 400, null, false, "Failed to delete person.");
+                  });  
     } else {
         return res.successResponse({msg: "Permission denied"}, 403, null, false, "Permission denied");    
     }
@@ -199,10 +219,10 @@ module.exports = {
     });
     if(isAuthorized){
       if(req.query){
-        var result = await Person.find(req.query).populate("permissions").populate("role");
+        var result = await Person.find(req.query).populate("permissions").populate("r");
         res.json(result);
       }else{
-        res.json(await Person.find().populate("permissions").populate("role"));
+        res.json(await Person.find().populate("permissions").populate("r"));
       }
     }else if(req.headers.authorization){
       const payload = await sails.helpers.verifyJwt.with({"token": req.headers.authorization})
@@ -210,7 +230,7 @@ module.exports = {
             return res.successResponse({msg: "Permission denied 1"}, 403, null, false, "Permission denied 1");
           });
       if(payload)
-        res.json(await Person.findOne({id: payload.id}).populate("permissions").populate("role"));
+        res.json(await Person.findOne({id: payload.id}).populate("permissions").populate("r"));
     }else{
       return res.successResponse({msg: "Permission denied"}, 403, null, false, "Permission denied");
     }
@@ -456,264 +476,5 @@ module.exports = {
       return res.successResponse({msg: "Permission denied"}, 403, null, false, "Permission denied");
     }
   },
-
-  getReferrer: async function(req, res){
-    if(req.query.type==="referrer"){
-      var result = await Person.findOne({m: req.query.strQuery, curr_orbit: {">": 0}}).populate("p");
-    }else{
-      var result = await Person.findOne({m: req.query.strQuery}).populate("p");
-    }
-    
-    if(result){
-      return res.successResponse({
-        id: result.id, 
-        n: result.n, 
-        m: result.m, 
-        e: result.e, 
-        s: result.s,
-        p: result.p? result.p.n: undefined,
-        co: result.curr_orbit,
-        success: true
-      }, 200, null, true, "Person found");
-    }else{
-      return res.successResponse({success: false, msg: "Person not found"}, 404, null, false, "Person not found");
-    }  
-  },
-
-  approveNewJoinee: async function(req, res){
-    payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization})
-    .tolerate(()=>{});
-
-    if(req.body.amount !== sails.config.custom.REGISTRATION_CHARGE + sails.config.custom.REGISTRATION_CHARGE*sails.config.custom.DONATION_PERCENT_OF_PAID_AMOUNT){
-      return res.successResponse({}, 200, null, false, "Amount invalid. Please contact administrator.");      
-    }
-
-    var approver = await Person.findOne({id: payload.uid});
-    if(approver.aw < sails.config.custom.REGISTRATION_CHARGE){
-      return res.successResponse({msg: `Insufficient Balance. Min amount needed for approval is ${sails.config.custom.REGISTRATION_CHARGE}`}, 200, null, false, "Insufficient amount");
-    }
-
-    var newPerson = await Person.findOne({id: req.body.newJoineeId});
-    if(newPerson.s!=="APPROVAL_PENDING"){
-      return res.successResponse({msg: `Person is already approved`}, 200, null, false, "Person is already approved");
-    }    
-
-    await sails.helpers.approveNewJoinee.with({
-      personId: req.body.newJoineeId, 
-      approverId: payload.uid,
-      amount: req.body.amount
-    })
-    .intercept('invalid_amount', (e)=>{
-      // console.log(e);
-      return res.successResponse({code: "Invalid Amount"}, 500, null, false, "Invalid Amount");
-    });
-
-    var person = await Person.findOne({id: req.body.newJoineeId});
-    if(person.s==="ACTIVE"){
-      return res.successResponse(person, 200, null, true, "Approval successful");
-    }else{
-      return res.successResponse(person, 200, null, false, "Approval Failed");
-    }
-  },
-
-  updateProfileImages: async function(req, res){
-    payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization})
-    .tolerate(()=>{});
-
-    try{
-      if(req.body.field==="adh_f"){
-        await Person.updateOne({id: payload.uid}).set({"adh_f": req.body.data});
-      }else if(req.body.field==="adh_b"){
-        await Person.updateOne({id: payload.uid}).set({"adh_b": req.body.data});
-      }else if(req.body.field==="pic"){
-        await Person.updateOne({id: payload.uid}).set({"pic": req.body.data});
-      }else if(req.body.field==="pan"){
-        await Person.updateOne({id: payload.uid}).set({"pan": req.body.data});
-      }  
-      return res.successResponse({"success": true}, 200, null, true, "Update successful");
-    }catch(e){
-      return res.successResponse({"success": false}, 400, null, false, "Update failed");
-    }
-  },
-
-  transferCredits: async function(req, res){
-    payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization})
-    .tolerate(()=>{});
-
-    if(!payload.uid){
-      return res.successResponse({"success": false}, 403, null, false, "Unauthorized access"); 
-    }
-
-    try{
-      var client = Person.getDatastore().manager.client;
-      var session = client.startSession();
-
-      const transactionOptions = {
-        readPreference: 'primary',
-        readConcern: { level: 'local' },
-        writeConcern: { w: 'majority' }
-      };
-      var personId=ObjectId(payload.uid);
-      var recieverId = ObjectId(req.body.recieverId)
-
-      var person = await Person.findOne({"id": payload.uid});
-      var reciever = await Person.findOne({"id": req.body.recieverId});
-
-      // var recieverBal = reciever.aw + reciever.dq + reciever.acnl;
-      // var personBal = person.aw + person.dq + person.acnl;
-
-      if(person.aw < req.body.amount){
-        return res.successResponse({"success": false}, 200, null, false, `Insufficient funds. Only ${person.aw} points are available`);
-      }
-
-      try {
-        await session.withTransaction(async () => {
-            const personColl = Person.getDatastore().manager.collection(Person.tableName);
-            const transColl = Transaction.getDatastore().manager.collection(Transaction.tableName);
-
-            var result1 = await personColl.updateOne({
-              "_id": ObjectId(payload.uid)}, 
-              {"$inc": {"aw": -1*Math.abs(req.body.amount), "taw": Math.abs(req.body.amount)}}, 
-              {session}
-            );
-
-            var result2 = await personColl.updateOne({
-              "_id": ObjectId(req.body.recieverId)}, 
-              {"$inc": {"aw": Math.abs(req.body.amount)}}, 
-              {session}
-            );
-
-            var transR1 = await transColl.insertOne({ 
-                "p": ObjectId(payload.uid),
-                "a": req.body.amount,
-                "c": `Transferred to ${reciever.n} with mobile ${reciever.m}`,
-                "c_d": "d"
-              }, 
-              {session}
-            );
-
-            var transR2 = await transColl.insertOne({ 
-                "p": ObjectId(req.body.recieverId),
-                "a": req.body.amount,
-                "c": `Recieved from ${person.n} with mobile ${person.m}`,
-                "c_d": "c"
-              }, 
-              {session}
-            );
-
-        }, transactionOptions);   
-        return res.successResponse({}, 200, null, true, "Transfer successful");
-      } catch(e){
-        console.log(e);
-        throw "dbError";
-      }
-      finally {
-          await session.endSession();
-      }
-
-    }catch(e){
-      console.log(e);
-      return res.successResponse({"success": false}, 400, null, false, "Update failed");
-    }
-  },
-
-  updatePersonPlatform: async function(req, res){
-    const isAuthorized = await sails.helpers.authorizeUser
-    .with({token: req.headers.authorization, "permission": "CREATE_PERMISSION"})
-    .intercept('tokenExpired', ()=>{
-      return res.successResponse({code:"tokenExpired"}, 403, null, false, "Permission denied. Token Expired.");
-    })
-    .intercept('invalidToken', ()=>{
-      return res.successResponse({code: "invalidToken"}, 403, null, false, "Permission denied");
-    }).intercept('dbError', ()=>{
-      return res.successResponse({code: "dbError"}, 500, null, false, "Some database error occured");
-    });
-
-    if(isAuthorized){
-      const personColl = Person.getDatastore().manager.collection(Person.tableName);
-
-      var result = await personColl.updateMany({
-        "ddl.9": {$exists: false},
-      }, {
-        "$set": {
-          "pf": "s",
-          "team": {"s":0, "g":0, "d":0, "p": 0}
-        }
-      });
-
-      var result = await personColl.updateMany({
-        "team.s": {">": 9},
-        "pf": "s"
-      }, {
-        "$set": {
-          "pf": "g",
-          "pfd.g": (new Date()).getTime()
-        }
-      });
-
-      var result = await personColl.updateMany({
-        "team.g": {">": 4},
-        "pf": "g"
-      }, {
-        "$set": {
-          "pf": "d",
-          "pfd.d": (new Date()).getTime()
-        }
-      });
-
-      var result = await personColl.updateMany({
-        "team.d": {">": 2},
-        "pf": "d"
-      }, {
-        "$set": {
-          "pf": "p",
-          "pfd.p": (new Date()).getTime()
-        }
-      });
-
-      return res.successResponse({code: "success"}, 200, null, false, "Success");
-    }
-
-    return res.successResponse({code: "invalidToken"}, 403, null, false, "Permission denied");
-  },
-
-  getTransactions: async function(req, res){
-    payload = await sails.helpers.verifyJwt.with({token: req.headers.authorization})
-    .tolerate(()=>{});
-
-    if(!payload){
-      return res.successResponse({code: "invalidToken"}, 403, null, false, "Permission denied"); 
-    }
-
-    const transColl = Transaction.getDatastore().manager.collection(Transaction.tableName);
-
-    if(!req.query.endDate){
-      var currDate = new Date();
-      req.query.endDate = `${currDate.getFullYear()}/${currDate.getMonth()+1}/${currDate.getDate()+1}`
-    }
-
-    if(!req.query.startDate){
-      var today = new Date();
-      var priorDate = new Date(new Date().setDate(today.getDate() - 30));
-      req.query.startDate = `${priorDate.getFullYear()}/${priorDate.getMonth()+1}/${priorDate.getDate()}`
-    }
-
-    await transColl.aggregate([
-      {
-        "$match": {
-          "p": ObjectId(payload.uid),
-          "_id": {"$gte": await sails.helpers.objectidFromTimestamp.with({"mDate": req.query.startDate})},
-          "_id": {"$lt": await sails.helpers.objectidFromTimestamp.with({"mDate": req.query.endDate})},
-        }
-      },
-    ]).toArray(async(err, results)=>{
-      if(err){
-        return res.serverError(err);
-      }  
-
-      console.log(results)
-      return res.successResponse(results, 200, null, true, "Transactions fetched successfully");
-    });
-  }
 };
 

@@ -54,6 +54,27 @@ module.exports = {
 		        	}
 		        	return;
 		        } 
+		        console.log(req.body.paymentGatewayId);
+		        console.log(merchant.id);
+		        if(req.body.paymentGatewayId && merchant.id){
+		        	var amount = Number(req.body.amount);
+		        	const mpgColl = MerchantPG.getDatastore().manager.collection(MerchantPG.tableName);
+		        	await mpgColl.updateOne(
+		        		{m: ObjectId(merchant.id), pg: ObjectId(req.body.paymentGatewayId)},
+		        		{
+		        			$inc: {
+		        				dcoll: amount, 
+		        				wcoll: amount, 
+		        				mcoll: amount,
+	        					dTrans: 1,
+	        					wTrans: 1,
+	        					mTrans: 1,
+	        					priority: 1
+        					}
+        				}
+	        		);
+		        }
+
 		    }catch(e){ 
 		    	console.log(req.headers);
 		    	console.log(req.body);

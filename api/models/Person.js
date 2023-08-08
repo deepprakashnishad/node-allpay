@@ -14,13 +14,13 @@ module.exports = {
     },
     m:{ // Mobile
         type:"string",
-        required: true,
-        unique: true
+        allowNull: true
     },
     e:{ // Email
         type:"string",
         isEmail: true,
-        allowNull: true
+        unique: true,
+        required: true
     },
     userLogin:{
         model: "userLogin",

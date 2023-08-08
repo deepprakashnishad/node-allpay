@@ -22,11 +22,12 @@ module.exports = {
     e:{ //Email
         type:"String",
         isEmail: true,
-        allowNull: true
+        unique: true,
+        required: true
     },
     m:{ //Mobile
         type:"string",
-        unique: true,
+        allowNull: true
     },
     p: { //Person
         model: "Person",
