@@ -55,6 +55,8 @@ module.exports = {
         var payload = jwt.verify(token[1], inputs.secretKey,{algorithm: inputs.algorithm});
         if(inputs.tokenOwnerType==='merchant'){
           var merchant = await Merchant.findOne({id: payload.mid});
+          console.log(payload);
+        console.log(merchant.passcode);
           if(payload.passCode === merchant.passcode){
             return exits.success(merchant);
           }else{

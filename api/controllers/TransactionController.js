@@ -7,14 +7,17 @@ module.exports = {
 			token: req.headers.authorization, 
 			secretKey: sails.config.models.dataEncryptionKeys.merchantSecretKey
 		})
-    	.intercept('invalidToken', (err)=>{
+    	.tolerate('invalidToken', (err)=>{
     		console.log(err);
+    		return;
     		return res.successResponse(err, 403, null, false, "Invalid token");
-    	}).intercept('tokenExpired', (err)=>{
+    	}).tolerate('tokenExpired', (err)=>{
     		console.log(err);
+    		return;
     		return res.successResponse(err, 403, null, false, "Token Expired");
-    	}).intercept('passCodeMismatch', (err)=>{
+    	}).tolerate('passCodeMismatch', (err)=>{
     		console.log(err);
+    		return;
     		return res.successResponse(err, 403, null, false, "Passcode in token is invalid");
     	});
 	    if(merchant){ 
@@ -45,8 +48,7 @@ module.exports = {
 	        	var mTransaction = await Transaction.create(trans).fetch(); 
 		        res.successResponse({}, 201, null, true, "Transaction created"); 	
 		        if(req.body.allpayCallbackUrl){ 
-		        	var completeCallbackUrl = `${req.body.allpayCallbackUrl}?payment_status=${req.body.status}&trans
-		        	['poid']=${req.body.partnerOrderId}&pom=${req.body.paymentMode}&transactionId=${mTransaction.id}`;
+		        	var completeCallbackUrl = `${req.body.allpayCallbackUrl}?payment_status=${req.body.status}&poid=${req.body.partnerOrderId}&pom=${req.body.paymentMode}&transactionId=${mTransaction.id}`;
 		        	console.log(completeCallbackUrl);
 		        	var response = await axios.get(completeCallbackUrl);
 		        	if(response.status!==200){
@@ -54,25 +56,35 @@ module.exports = {
 		        	}
 		        	return;
 		        } 
-		        console.log(req.body.paymentGatewayId);
-		        console.log(merchant.id);
 		        if(req.body.paymentGatewayId && merchant.id){
 		        	var amount = Number(req.body.amount);
 		        	const mpgColl = MerchantPG.getDatastore().manager.collection(MerchantPG.tableName);
-		        	await mpgColl.updateOne(
-		        		{m: ObjectId(merchant.id), pg: ObjectId(req.body.paymentGatewayId)},
-		        		{
-		        			$inc: {
-		        				dcoll: amount, 
-		        				wcoll: amount, 
-		        				mcoll: amount,
-	        					dTrans: 1,
-	        					wTrans: 1,
-	        					mTrans: 1,
-	        					priority: 1
-        					}
-        				}
-	        		);
+
+		        	if(req.body.status.toUpperCase()==="CAPTURED" || req.body.status.toUpperCase()==="SUCCESS"){
+		        		await mpgColl.updateOne(
+			        		{m: ObjectId(merchant.id), pg: ObjectId(req.body.paymentGatewayId)},
+			        		{
+			        			$inc: {
+			        				dcoll: amount, 
+			        				wcoll: amount, 
+			        				mcoll: amount,
+		        					dTrans: 1,
+		        					wTrans: 1,
+		        					mTrans: 1,
+		        					priority: 1
+	        					}
+	        				}
+	        			)
+		        	}else{
+		        		await mpgColl.updateOne(
+			        		{m: ObjectId(merchant.id), pg: ObjectId(req.body.paymentGatewayId)},
+			        		{
+			        			$inc: {
+		        					priority: 1
+	        					}
+	        				}
+	        			)
+		        	}
 		        }
 
 		    }catch(e){ 
