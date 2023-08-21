@@ -86,6 +86,8 @@ module.exports.routes = {
 
   'GET /Report/daily-transaction-report': {controller: "Report", action: "getDailyTransactionReport"},
   'GET /Report/transaction': {controller: "Report", action: "getTransactions"},
+  'GET /Report/getTotalTransactionsCount': {controller: "Report", action: "getTotalTransactionsCount"},
+  
   'GET /Report/merchant-pg-summary': {controller: "Report", action: "getMerchantPGSummary"},
 
   'POST /Transaction': {controller: "Transaction", action:"create"}, 

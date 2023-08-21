@@ -13,6 +13,16 @@ module.exports = {
     var start = req.query.start;
     var end =req.query.end;
 
+    var limit = 50;
+    if(req.query.limit){
+      limit = Number(req.query.limit);
+    }
+
+    var offset = 50;
+    if(req.query.offset){
+      offset = Number(req.query.offset);
+    }
+
     const transColl = Transaction.getDatastore().manager.collection(Transaction.tableName);
 
     await transColl.aggregate([
@@ -44,6 +54,8 @@ module.exports = {
         }
       },
       {   $unwind:"$bp" }, 
+      {$skip: offset},
+      {$limit: limit},
       {
         $project: {
           _id: 1,
@@ -64,11 +76,17 @@ module.exports = {
         }
       }
     ]).toArray(async(err, results)=>{
+      
       if(err){
         return res.serverError(err);
       }  
       return res.successResponse({txns: results}, 200, null, true, "Transactions fetched successfully");
     });
+  },
+
+  getTotalTransactionsCount: async function(req, res){
+    var totalTransactions = await Transaction.count();
+    return res.successResponse({count: totalTransactions}, 200, null, true, "Transactions fetched successfully");
   },
 
   getDailyTransactionReport: async function (req, res) {
