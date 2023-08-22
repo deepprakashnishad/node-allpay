@@ -49,9 +49,9 @@ module.exports = {
 		        res.successResponse({}, 201, null, true, "Transaction created"); 	
 		        if(req.body.allpayCallbackUrl){ 
 		        	var completeCallbackUrl = `${req.body.allpayCallbackUrl}?payment_status=${req.body.status}&poid=${req.body.partnerOrderId}&pom=${req.body.paymentMode}&transactionId=${mTransaction.id}`;
-		        	// console.log(completeCallbackUrl);
+		        	console.log(completeCallbackUrl);
 		        	var response = await axios.get(completeCallbackUrl);
-	        		// console.log(response);
+	        		console.log(response);
 		        } 
 		        if(req.body.paymentGatewayId && merchant.id){
 		        	var amount = Number(req.body.amount);
