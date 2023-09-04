@@ -94,5 +94,6 @@ module.exports.routes = {
   'GET /Transaction/getTransactionByPartnerOrderId': {controller: "Transaction", action:"getTransactionByPartnerOrderId"}, 
 
   'POST /Generic/submit-contact-details': {controller: "Generic", action:"submitContactDetails"}, 
+  'GET /Generic/wake-up': {controller: "Generic", action:"wakeUp"},
 };
 //Added to restart server
